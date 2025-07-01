@@ -5,10 +5,17 @@ const Role = require("../models/roleModel");
 const { Op } = require("sequelize");
 const createError = require("http-errors");
 const { successResponse } = require("../services/response");
-const { verifyEmailTemplate } = require("../utils/emailTemplate");
+const {
+  verifyEmailTemplate,
+  resetPasswordEmailTemplate,
+} = require("../utils/emailTemplate");
 const { sendWithNodemailer } = require("../services/emailServices");
-const { createJsonWebToken } = require("../services/jsonWebToken");
+const {
+  createJsonWebToken,
+  verifyJsonWebToken,
+} = require("../services/jsonWebToken");
 const appConfig = require("../config/constant");
+const bcrypt = require("bcrypt");
 
 const registerUser = async (req, res) => {
   try {
@@ -74,7 +81,37 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  // Implement login logic here
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      throw createError(400, "Email and password are required");
+    const foundUser = await User.findOne({ where: { email } });
+    if (!foundUser) throw createError(401, "Invalid email or password");
+    if (!foundUser.verifiedAt)
+      throw createError(403, "Please verify your email before logging in");
+    const isMatch = await bcrypt.compare(password, foundUser.password);
+    if (!isMatch) throw createError(401, "Invalid email or password");
+    const role = await Role.findByPk(foundUser.roleId);
+    const payload = {
+      userId: foundUser.id,
+      email: foundUser.email,
+      role: role.permissions,
+      fullName: foundUser.fullName,
+      googleId: foundUser.googleId,
+    };
+    const token = createJsonWebToken(
+      payload,
+      appConfig.jwt.accessKey.privateKey,
+      "1d"
+    );
+    return successResponse(res, {
+      message: "Login successful",
+      token,
+      user: payload,
+    });
+  } catch (err) {
+    throw createError(err);
+  }
 };
 
 const verifyUser = async (req, res) => {
@@ -105,11 +142,56 @@ const verifyUser = async (req, res) => {
   }
 };
 const forgetPass = async (req, res) => {
-  // Implement password reset logic here
+  try {
+    const { email } = req.body;
+    if (!email) throw createError(400, "Email is required");
+    const user = await User.findOne({ where: { email } });
+    if (!user) throw createError(404, "User with this email does not exist");
+    // Create reset token (JWT, expires in 15 min)
+    const token = createJsonWebToken(
+      { userId: user.id, email: user.email },
+      appConfig.jwt.accessKey.privateKey,
+      "15m"
+    );
+    // Send email
+    const emailData = resetPasswordEmailTemplate(
+      user.email,
+      user.fullName || user.username,
+      token
+    );
+    await sendWithNodemailer(emailData);
+    return successResponse(res, {
+      message: "Password reset email sent. Please check your inbox.",
+    });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message });
+  }
 };
 
 const resetPass = async (req, res) => {
-  // Implement password reset logic here
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword)
+      throw createError(400, "Token and newPassword are required");
+    let decoded;
+    try {
+      decoded = verifyJsonWebToken(token, appConfig.jwt.accessKey.publicKey);
+    } catch (err) {
+      throw createError(400, "Invalid or expired reset token");
+    }
+    const user = await User.findByPk(decoded.userId);
+    if (!user) throw createError(404, "User not found");
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+    return successResponse(res, {
+      message:
+        "Password reset successful. You can now log in with your new password.",
+    });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message });
+  }
 };
 const loginGoogle = async (req, res) => {
   try {
@@ -148,39 +230,6 @@ const logout = async (req, res) => {
   // Implement logout logic here
 };
 
-const registerUserWithGoogle = async (req, res) => {
-  try {
-    const { token } = req.body;
-    // Here you would verify the Google token and extract user info
-    // For demonstration, let's assume you have a function verifyGoogleToken(token)
-    // const googleUser = await verifyGoogleToken(token);
-    // Example mock:
-    const googleUser = {
-      email: "googleuser@example.com",
-      fullName: "Google User",
-      googleId: "google-id-123",
-      images: "https://example.com/photo.jpg",
-    };
-    // Check if user already exists
-    let user = await User.findOne({ where: { email: googleUser.email } });
-    if (!user) {
-      user = await User.create({
-        email: googleUser.email,
-        fullName: googleUser.fullName,
-        googleId: googleUser.googleId,
-        images: googleUser.images,
-        username: googleUser.email.split("@")[0],
-        status: true,
-      });
-    }
-    res
-      .status(201)
-      .json({ message: "User registered with Google successfully", user });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
-
 module.exports = {
   registerUser,
   loginUser,
@@ -190,5 +239,4 @@ module.exports = {
   loginGoogle,
   loginMobile,
   logout,
-  registerUserWithGoogle,
 };

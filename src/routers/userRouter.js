@@ -6,6 +6,7 @@ const { updateUserById } = require("../controllers/userController");
 const { deleteUserById } = require("../controllers/userController");
 const validateSchema = require("../middlewares/validateSchema");
 const userSchema = require("../schemas/userSchema");
+const { resetPass } = require("../controllers/authController");
 
 /**
  * @swagger
@@ -155,5 +156,36 @@ router.post("/:id/artisan", validateSchema(artisanProfileSchema), createArtisanP
  *         description: Bad request
  */
 router.put("/:id/artisan", validateSchema(artisanProfileSchema), updateArtisanById);
+
+/**
+ * @swagger
+ * /users/reset-pass:
+ *   post:
+ *     summary: Set new password using reset token (after email link)
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *             example:
+ *               token: "reset-token-from-email"
+ *               newPassword: "NewStrongPass123!"
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.post("/reset-pass", resetPass);
 
 module.exports = router;

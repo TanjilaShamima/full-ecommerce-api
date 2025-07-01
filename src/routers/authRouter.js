@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
-  registerUser,
-  registerUserWithGoogle,
+  registerUser
 } = require("../controllers/authController");
 const { loginUser } = require("../controllers/authController");
 const { verifyUser } = require("../controllers/authController");
@@ -67,6 +66,57 @@ router.post("/register", validateSchema(userSchema), registerUser);
  *   post:
  *     summary: Login user
  *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 example: StrongPass123!
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 statusCode:
+ *                   type: integer
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                     fullName:
+ *                       type: string
+ *                     googleId:
+ *                       type: string
+ *       400:
+ *         description: Invalid request
+ *       401:
+ *         description: Invalid email or password
+ *       403:
+ *         description: Please verify your email before logging in
  */
 router.post("/login", loginUser);
 /**
@@ -104,18 +154,59 @@ router.post("/verify-user/:id", verifyUser);
  * @swagger
  * /auth/forget-pass:
  *   post:
- *     summary: Forget password
+ *     summary: Request password reset (send reset link to email)
  *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *             example:
+ *               email: user@example.com
+ *     responses:
+ *       200:
+ *         description: Password reset email sent
+ *       400:
+ *         description: Bad request
  */
 router.post("/forget-pass", forgetPass);
+
 /**
  * @swagger
  * /auth/reset-pass:
- *   get:
- *     summary: Reset password
+ *   post:
+ *     summary: Reset password using token
  *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *             example:
+ *               token: "reset-token-from-email"
+ *               newPassword: "NewStrongPass123!"
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *       400:
+ *         description: Invalid or expired token
  */
-router.get("/reset-pass", resetPass);
+router.post("/reset-pass", resetPass);
 /**
  * @swagger
  * /auth/logout:
