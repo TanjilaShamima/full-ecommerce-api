@@ -3,6 +3,7 @@ const router = express.Router();
 const validateSchema = require("../middlewares/validateSchema");
 const roleSchema = require("../schemas/roleSchema");
 const permitRole = require("../middlewares/permitRole");
+const { isLoggedIn } = require("../middlewares/auth");
 const {
   deleteRoleById,
   updateRoleById,
@@ -48,6 +49,8 @@ const {
  * /roles:
  *   post:
  *     summary: Create a new role (admin and super admin only)
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Role]
  *     requestBody:
  *       required: true
@@ -81,6 +84,8 @@ const {
  *         description: Bad request
  *   get:
  *     summary: Get all roles (admin and super admin only)
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Role]
  *     responses:
  *       200:
@@ -97,6 +102,8 @@ const {
  * /roles/{id}:
  *   put:
  *     summary: Update role by ID (admin and super admin only)
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Role]
  *     parameters:
  *       - in: path
@@ -121,6 +128,8 @@ const {
  *         description: Role not found
  *   delete:
  *     summary: Delete role by ID (admin and super admin only)
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Role]
  *     parameters:
  *       - in: path
@@ -136,17 +145,19 @@ const {
  */
 router.post(
   "/",
+  isLoggedIn,
   permitRole(["admin", "super_admin"]),
   validateSchema(roleSchema),
   createRole
 );
-router.get("/", permitRole(["admin", "super_admin"]), getRoles);
+router.get("/", isLoggedIn, permitRole(["admin", "super_admin"]), getRoles);
 router.put(
   "/:id",
+  isLoggedIn,
   permitRole(["admin", "super_admin"]),
   validateSchema(roleSchema),
   updateRoleById
 );
-router.delete("/:id", permitRole(["admin", "super_admin"]), deleteRoleById);
+router.delete("/:id", isLoggedIn, permitRole(["admin", "super_admin"]), deleteRoleById);
 
 module.exports = router;

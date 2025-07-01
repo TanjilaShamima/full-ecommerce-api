@@ -4,6 +4,7 @@ const craftTypeController = require("../controllers/craftTypeController");
 const validateSchema = require("../middlewares/validateSchema");
 const craftTypeSchema = require("../schemas/craftTypeSchema");
 const permitRole = require("../middlewares/permitRole");
+const { isLoggedIn } = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -32,6 +33,8 @@ const permitRole = require("../middlewares/permitRole");
  * /craft-types:
  *   post:
  *     summary: Create a new craft type
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Craft Type]
  *     requestBody:
  *       required: true
@@ -71,36 +74,13 @@ const permitRole = require("../middlewares/permitRole");
  *               items:
  *                 $ref: '#/components/schemas/Craft Type'
  */
-router.post(
-  "/",
-  validateSchema(craftTypeSchema),
-  permitRole(["super_admin", "admin"]),
-  craftTypeController.createNewCraft
-);
-router.get("/", craftTypeController.getAllCraft);
 /**
  * @swagger
  * /craft-types/{id}:
- *   get:
- *     summary: Get craft type by ID
- *     tags: [Craft Type]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Craft type found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Craft Type'
- *       404:
- *         description: Craft type not found
  *   put:
  *     summary: Update craft type by ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Craft Type]
  *     parameters:
  *       - in: path
@@ -135,6 +115,8 @@ router.get("/", craftTypeController.getAllCraft);
  *         description: Craft type not found
  *   delete:
  *     summary: Delete craft type by ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Craft Type]
  *     parameters:
  *       - in: path
@@ -148,15 +130,25 @@ router.get("/", craftTypeController.getAllCraft);
  *       404:
  *         description: Craft type not found
  */
+router.post(
+  "/",
+  isLoggedIn,
+  validateSchema(craftTypeSchema),
+  permitRole(["super_admin", "admin"]),
+  craftTypeController.createNewCraft
+);
+router.get("/", craftTypeController.getAllCraft);
 router.get("/:id", craftTypeController.getCraftById);
 router.put(
   "/:id",
+  isLoggedIn,
   validateSchema(craftTypeSchema),
   permitRole(["super_admin", "admin"]),
   craftTypeController.updateCraftById
 );
 router.delete(
   "/:id",
+  isLoggedIn,
   permitRole(["super_admin", "admin"]),
   craftTypeController.deleteCraftById
 );
