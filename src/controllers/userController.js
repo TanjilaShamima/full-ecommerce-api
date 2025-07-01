@@ -16,9 +16,14 @@ const deleteUserById = async(req, res) => {
   // Implement logic to delete user by ID
 };
 
+const updatePassword = async(req, res) => {
+
+}
+
 module.exports = {
   getUserById,
   getMyDetails,
   updateUserById,
   deleteUserById,
+  updatePassword
 };

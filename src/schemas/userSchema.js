@@ -14,13 +14,17 @@ const userSchema = Joi.object({
   email: Joi.string().email().required(),
   fullName: Joi.string().min(1).max(50).required(),
   dateOfBirth: Joi.date().optional(),
-  status: Joi.boolean().default(true),
+  status: Joi.string()
+    .valid("pending", "active", "deactivate", "baned", "deleted")
+    .default(Joi.ref('role', {
+      adjust: (role) => role === 'artisan' ? 'pending' : 'active',
+    })),
   gender: Joi.string().valid("male", "female", "other").optional(),
   mobile: Joi.string().pattern(/^[0-9]{10,15}$/).optional(),
   images: Joi.object().optional().allow(null),
-  requestRole: Joi.string()
-    .valid("customer", "merchant", "artisan", "admin", "super_admin")
-    .optional(),
+  role: Joi.string()
+    .valid("super_admin", "admin", "customer", "artisan", "merchant")
+    .default("customer"),
   googleId: Joi.string().optional(),
   createdAt: Joi.date().default(() => new Date()),
   updatedAt: Joi.date().default(() => new Date()),

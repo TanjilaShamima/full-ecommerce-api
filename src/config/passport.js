@@ -28,7 +28,7 @@ passport.use(
           email: profile.emails[0].value,
           googleId: profile.id,
           images: profile.photos[0].value,
-          verified: true,
+          verifiedAt: new Date(Date.now()),
         });
         done(null, newUser);
       } catch (err) {

@@ -8,7 +8,6 @@ const sequelize = require("../config/sequelize");
 const bcrypt = require("bcrypt");
 const Address = require("./addressModel");
 const ArtisanProfile = require("./artisanProfileModel");
-const Role = require("./roleModel");
 
 const User = sequelize.define(
   "User",
@@ -36,8 +35,9 @@ const User = sequelize.define(
       allowNull: true,
     },
     status: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      type: DataTypes.ENUM("pending", "active", "deactivate", "baned", "deleted"),
+      allowNull: false,
+      defaultValue: "active",
     },
     gender: {
       type: DataTypes.ENUM("male", "female", "other"),
@@ -68,17 +68,10 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    roleId: {
-      type: DataTypes.INTEGER,
+    role: {
+      type: DataTypes.ENUM("super_admin", "admin", "customer", "artisan", "merchant"),
       allowNull: false,
-    },
-    requestRoleId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    requestRoleId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
+      defaultValue: "customer",
     },
     otp: {
       type: DataTypes.STRING,
@@ -96,11 +89,17 @@ const User = sequelize.define(
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);
         }
+        if (user.role === "artisan") {
+          user.status = "pending";
+        }
       },
       beforeUpdate: async (user) => {
         if (user.changed("password")) {
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);
+        }
+        if (user.changed("role") && user.role === "artisan") {
+          user.status = "pending";
         }
       },
     },
@@ -113,8 +112,5 @@ Address.belongsTo(User, { foreignKey: "userId", as: "user" });
 
 User.hasOne(ArtisanProfile, { foreignKey: "userId", as: "artisanProfile" });
 ArtisanProfile.belongsTo(User, { foreignKey: "userId", as: "user" });
-
-User.belongsTo(Role, { foreignKey: "roleId", as: "role" });
-User.belongsTo(Role, { foreignKey: "requestRoleId", as: "requestRole" });
 
 module.exports = User;

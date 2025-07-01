@@ -1,7 +1,6 @@
 // Auth Controller
 
 const User = require("../models/userModel");
-const Role = require("../models/roleModel");
 const { Op } = require("sequelize");
 const createError = require("http-errors");
 const { successResponse } = require("../services/response");
@@ -24,7 +23,7 @@ const registerUser = async (req, res) => {
       fullName,
       mobile,
       password,
-      requestRole: requestRoleName,
+      role
     } = req.body;
     // Check if user already exists
     const existingUser = await User.findOne({
@@ -33,37 +32,21 @@ const registerUser = async (req, res) => {
     if (existingUser) {
       throw createError(400, "User with this email or mobile already exists");
     }
-    // Find the 'customer' role for default
-    const customerRole = await Role.findOne({
-      where: { permissions: "customer" },
-    });
-    if (!customerRole) {
-      throw createError(500, "Default customer role not found in Roles table");
-    }
-    let requestRoleId = null;
-    if (requestRoleName) {
-      const reqRole = await Role.findOne({
-        where: { permissions: requestRoleName },
-      });
-      if (!reqRole) {
-        throw createError(400, "Requested role does not exist");
-      }
-      requestRoleId = reqRole.id;
-    }
+
     // otp generate
     const otp = Math.floor(1000000 + Math.random() * 9000).toString();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
     // Create username from email prefix if not provided
     const username = email.split("@")[0];
+
     const user = await User.create({
       email,
       fullName,
       mobile,
       password,
       username,
-      status: true,
-      roleId: customerRole.id,
-      requestRoleId,
+      status: role ? "pending" : "active",
+      role: role ? role : 'customer',
       otp,
       otpExpiresAt,
     });
@@ -91,11 +74,10 @@ const loginUser = async (req, res) => {
       throw createError(403, "Please verify your email before logging in");
     const isMatch = await bcrypt.compare(password, foundUser.password);
     if (!isMatch) throw createError(401, "Invalid email or password");
-    const role = await Role.findByPk(foundUser.roleId);
     const payload = {
       userId: foundUser.id,
       email: foundUser.email,
-      role: role.permissions,
+      role: foundUser.role,
       fullName: foundUser.fullName,
       googleId: foundUser.googleId,
     };
@@ -131,7 +113,6 @@ const verifyUser = async (req, res) => {
     user.otp = null;
     user.otpExpiresAt = null;
     user.verifiedAt = new Date();
-    user.status = true;
     await user.save();
     successResponse(res, {
       statusCode: 200,
@@ -204,7 +185,7 @@ const loginGoogle = async (req, res) => {
     const payload = {
       userId: user.id,
       email: user.email,
-      role: user.roleId,
+      role: user.role,
       fullName: user.fullName,
       googleId: user.googleId,
     };
