@@ -48,6 +48,7 @@ const {
 const addressSchema = require("../schemas/addressSchema");
 const { createArtisanProfile, getArtisanById, updateArtisanById } = require("../controllers/artisanProfileController");
 const artisanProfileSchema = require("../schemas/artisanProfileSchema");
+const { isLoggedIn } = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -60,25 +61,119 @@ const artisanProfileSchema = require("../schemas/artisanProfileSchema");
  * /users/{id}/addresses:
  *   get:
  *     summary: Get all addresses by user ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Address]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: List of addresses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Address'
  *   post:
  *     summary: Create address by user ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Address]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Address'
+ *     responses:
+ *       201:
+ *         description: Address created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Address'
+ *       400:
+ *         description: Bad request
  */
-router.get("/:id/addresses", getAllAddressesByUserId);
-router.post("/:id/addresses", createAddressByUserId);
+router.get("/:id/addresses", isLoggedIn, getAllAddressesByUserId);
+router.post("/:id/addresses", isLoggedIn, validateSchema(addressSchema), createAddressByUserId);
 /**
  * @swagger
  * /users/{id}/addresses/{addressId}:
- *   delete:
- *     summary: Delete address by user ID
- *     tags: [Address]
  *   put:
  *     summary: Update address by user ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Address]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Address ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Address'
+ *     responses:
+ *       200:
+ *         description: Address updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Address'
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Address not found
+ *   delete:
+ *     summary: Delete address by user ID
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [Address]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *       - in: path
+ *         name: addressId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Address ID
+ *     responses:
+ *       200:
+ *         description: Address deleted successfully
+ *       404:
+ *         description: Address not found
  */
-router.delete("/:id/addresses/:addressId", deleteAddressByUserId);
-router.put("/:id/addresses/:addressId", validateSchema(addressSchema), updateAddressByUserId);
+router.put("/:id/addresses/:addressId", isLoggedIn, validateSchema(addressSchema), updateAddressByUserId);
+router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
 
 /**
  * @swagger
@@ -188,4 +283,37 @@ router.put("/:id/artisan", validateSchema(artisanProfileSchema), updateArtisanBy
  */
 router.post("/update-password", updatePassword);
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Address:
+ *       type: object
+ *       required:
+ *         - addressLine1
+ *         - city
+ *         - state
+ *         - postalCode
+ *         - country
+ *       properties:
+ *         addressLine1:
+ *           type: string
+ *         addressLine2:
+ *           type: string
+ *         city:
+ *           type: string
+ *         state:
+ *           type: string
+ *         postalCode:
+ *           type: string
+ *         country:
+ *           type: string
+ *       example:
+ *         addressLine1: "123 Main St"
+ *         addressLine2: "Apt 4B"
+ *         city: "Dhaka"
+ *         state: "Dhaka"
+ *         postalCode: "1207"
+ *         country: "Bangladesh"
+ */
 module.exports = router;
