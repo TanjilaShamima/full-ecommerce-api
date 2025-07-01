@@ -4,40 +4,9 @@ const { getUserById } = require("../controllers/userController");
 const { getMyDetails } = require("../controllers/userController");
 const { updateUserById } = require("../controllers/userController");
 const { deleteUserById } = require("../controllers/userController");
-const { updatePassword} = require("../controllers/userController");
+const { updatePassword } = require("../controllers/userController");
 const validateSchema = require("../middlewares/validateSchema");
 const userSchema = require("../schemas/userSchema");
-
-/**
- * @swagger
- * tags:
- *   name: User
- *   description: User APIs
- */
-/**
- * @swagger
- * /users/{id}:
- *   get:
- *     summary: Get user by ID
- *     tags: [User]
- *   put:
- *     summary: Update user by ID
- *     tags: [User]
- *   delete:
- *     summary: Delete user by ID
- *     tags: [User]
- */
-router.get("/:id", getUserById);
-router.put("/:id", validateSchema(userSchema), updateUserById);
-router.delete("/:id", deleteUserById);
-/**
- * @swagger
- * /users/me:
- *   get:
- *     summary: Get my details
- *     tags: [User]
- */
-router.get("/me", getMyDetails);
 
 const {
   getAllAddressesByUserId,
@@ -46,9 +15,120 @@ const {
   updateAddressByUserId,
 } = require("../controllers/addressController");
 const addressSchema = require("../schemas/addressSchema");
-const { createArtisanProfile, getArtisanById, updateArtisanById } = require("../controllers/artisanProfileController");
+const {
+  createArtisanProfile,
+  getArtisanById,
+  updateArtisanById,
+} = require("../controllers/artisanProfileController");
 const artisanProfileSchema = require("../schemas/artisanProfileSchema");
 const { isLoggedIn } = require("../middlewares/auth");
+
+/**
+ * @swagger
+ * tags:
+ *   name: User
+ *   description: User APIs
+ */
+
+ /**
+ * @swagger
+ * /users/me:
+ *   get:
+ *     summary: Get my details
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: My details loaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.get("/me", isLoggedIn, getMyDetails);
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User loaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
+ *   put:
+ *     summary: Update user by ID
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden (not your own profile)
+ *       404:
+ *         description: User not found
+ *   delete:
+ *     summary: Delete user by ID
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       403:
+ *         description: Forbidden (not your own account)
+ *       404:
+ *         description: User not found
+ */
+router.get("/:id", getUserById);
+router.put("/:id", validateSchema(userSchema), updateUserById);
+router.delete("/:id", deleteUserById);
 
 /**
  * @swagger
@@ -109,7 +189,12 @@ const { isLoggedIn } = require("../middlewares/auth");
  *         description: Bad request
  */
 router.get("/:id/addresses", isLoggedIn, getAllAddressesByUserId);
-router.post("/:id/addresses", isLoggedIn, validateSchema(addressSchema), createAddressByUserId);
+router.post(
+  "/:id/addresses",
+  isLoggedIn,
+  validateSchema(addressSchema),
+  createAddressByUserId
+);
 /**
  * @swagger
  * /users/{id}/addresses/{addressId}:
@@ -146,6 +231,8 @@ router.post("/:id/addresses", isLoggedIn, validateSchema(addressSchema), createA
  *               $ref: '#/components/schemas/Address'
  *       400:
  *         description: Bad request
+ *       403:
+ *         description: Forbidden (not your own address)
  *       404:
  *         description: Address not found
  *   delete:
@@ -169,10 +256,17 @@ router.post("/:id/addresses", isLoggedIn, validateSchema(addressSchema), createA
  *     responses:
  *       200:
  *         description: Address deleted successfully
+ *       403:
+ *         description: Forbidden (not your own address)
  *       404:
  *         description: Address not found
  */
-router.put("/:id/addresses/:addressId", isLoggedIn, validateSchema(addressSchema), updateAddressByUserId);
+router.put(
+  "/:id/addresses/:addressId",
+  isLoggedIn,
+  validateSchema(addressSchema),
+  updateAddressByUserId
+);
 router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
 
 /**
@@ -186,10 +280,54 @@ router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
  * /users/{id}/artisan:
  *   get:
  *     summary: Get artisan profile by user ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Artisan]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: Artisan profile loaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ArtisanProfile'
+ *       404:
+ *         description: Artisan profile not found
  *   put:
  *     summary: Update artisan profile by user ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Artisan]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ArtisanProfile'
+ *     responses:
+ *       200:
+ *         description: Artisan profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ArtisanProfile'
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Artisan profile not found
  */
 router.get("/:id/artisan", getArtisanById);
 /**
@@ -220,7 +358,11 @@ router.get("/:id/artisan", getArtisanById);
  *       400:
  *         description: Bad request
  */
-router.post("/:id/artisan", validateSchema(artisanProfileSchema), createArtisanProfile);
+router.post(
+  "/:id/artisan",
+  validateSchema(artisanProfileSchema),
+  createArtisanProfile
+);
 
 /**
  * @swagger
@@ -250,13 +392,19 @@ router.post("/:id/artisan", validateSchema(artisanProfileSchema), createArtisanP
  *       400:
  *         description: Bad request
  */
-router.put("/:id/artisan", validateSchema(artisanProfileSchema), updateArtisanById);
+router.put(
+  "/:id/artisan",
+  validateSchema(artisanProfileSchema),
+  updateArtisanById
+);
 
 /**
  * @swagger
  * /users/update-password:
  *   post:
  *     summary: Set new password using reset token (after email link)
+ *     security:
+ *       - bearerAuth: []
  *     tags: [User]
  *     requestBody:
  *       required: true

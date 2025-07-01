@@ -10,7 +10,7 @@ const addressSchema = Joi.object({
   addressLine2: Joi.string().min(3).max(100).optional(),
   city: Joi.string().min(2).max(50).required(),
   state: Joi.string().min(2).max(50).required(),
-  postalCode: Joi.string().pattern(/^[0-9]{5,10}$/).required(),
+  postalCode: Joi.string().required(),
   country: Joi.string().min(2).max(50).required(),
 });
 
