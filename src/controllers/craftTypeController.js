@@ -1,4 +1,6 @@
 const CraftType = require("../models/craftTypeModel");
+const createError = require("http-errors");
+const { successResponse } = require("../services/response");
 
 const createNewCraft = async (req, res) => {
   try {
@@ -6,9 +8,13 @@ const createNewCraft = async (req, res) => {
       name: req.body.name,
       description: req.body.description,
     });
-    res.status(201).json(craft);
+    return successResponse(res, {
+      statusCode: 201,
+      message: "Craft type created successfully",
+      payload: { craft },
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    throw createError(400, err.message);
   }
 };
 
@@ -21,40 +27,55 @@ const updateCraftById = async (req, res) => {
       },
       { where: { id: req.params.id } }
     );
-    if (!updated) return res.status(404).json({ error: "Craft type not found" });
+    if (!updated) throw createError(404, "Craft type not found");
     const craft = await CraftType.findByPk(req.params.id);
-    res.status(200).json(craft);
+    return successResponse(res, {
+      statusCode: 200,
+      message: "Craft type updated successfully",
+      payload: { craft },
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    throw createError(400, err.message);
   }
 };
 
 const deleteCraftById = async (req, res) => {
   try {
     const deleted = await CraftType.destroy({ where: { id: req.params.id } });
-    if (!deleted) return res.status(404).json({ error: "Craft type not found" });
-    res.status(204).send();
+    if (!deleted) throw createError(404, "Craft type not found");
+    return successResponse(res, {
+      statusCode: 200,
+      message: "Craft type deleted successfully",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    throw createError(500, err.message);
   }
 };
 
 const getAllCraft = async (req, res) => {
   try {
     const crafts = await CraftType.findAll();
-    res.status(200).json(crafts);
+    return successResponse(res, {
+      statusCode: 200,
+      message: "Craft types loaded successfully",
+      payload: { crafts },
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    throw createError(500, err.message);
   }
 };
 
 const getCraftById = async (req, res) => {
   try {
     const craft = await CraftType.findByPk(req.params.id);
-    if (!craft) return res.status(404).json({ error: "Craft type not found" });
-    res.status(200).json(craft);
+    if (!craft) throw createError(404, "Craft type not found");
+    return successResponse(res, {
+      statusCode: 200,
+      message: "Craft type loaded successfully",
+      payload: { craft },
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    throw createError(500, err.message);
   }
 };
 

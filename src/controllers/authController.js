@@ -66,12 +66,10 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
-      throw createError(400, "Email and password are required");
+    if (!email || !password) throw createError(400, "Email and password are required");
     const foundUser = await User.findOne({ where: { email } });
     if (!foundUser) throw createError(401, "Invalid email or password");
-    if (!foundUser.verifiedAt)
-      throw createError(403, "Please verify your email before logging in");
+    if (!foundUser.verifiedAt) throw createError(403, "Please verify your email before logging in");
     const isMatch = await bcrypt.compare(password, foundUser.password);
     if (!isMatch) throw createError(401, "Invalid email or password");
     const payload = {
@@ -87,14 +85,13 @@ const loginUser = async (req, res) => {
       "1d"
     );
     return successResponse(res, {
+      statusCode: 200,
       message: "Login successful",
-      payload: {
-        ...foundUser.dataValues,
-        token: token
-      }
+      token,
+      user: payload,
     });
   } catch (err) {
-    throw createError(err);
+    throw createError(err.status || 500, err.message);
   }
 };
 
@@ -137,25 +134,21 @@ const forgetPass = async (req, res) => {
       "15m"
     );
     // Send email
-    const emailData = resetPasswordEmailTemplate(
-      user.email,
-      user.fullName || user.username,
-      token
-    );
+    const emailData = resetPasswordEmailTemplate(user.email, user.fullName || user.username, token);
     await sendWithNodemailer(emailData);
     return successResponse(res, {
+      statusCode: 200,
       message: "Password reset email sent. Please check your inbox.",
     });
   } catch (err) {
-    return res.status(err.status || 500).json({ error: err.message });
+    throw createError(err.status || 500, err.message);
   }
 };
 
 const resetPass = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
-    if (!token || !newPassword)
-      throw createError(400, "Token and newPassword are required");
+    if (!token || !newPassword) throw createError(400, "Token and newPassword are required");
     let decoded;
     try {
       decoded = verifyJsonWebToken(token, appConfig.jwt.accessKey.publicKey);
@@ -164,26 +157,24 @@ const resetPass = async (req, res) => {
     }
     const user = await User.findByPk(decoded.userId);
     if (!user) throw createError(404, "User not found");
-    // Hash new password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
     return successResponse(res, {
-      message:
-        "Password reset successful. You can now log in with your new password.",
+      statusCode: 200,
+      message: "Password reset successful. You can now log in with your new password.",
     });
   } catch (err) {
-    return res.status(err.status || 500).json({ error: err.message });
+    throw createError(err.status || 500, err.message);
   }
 };
+
 const loginGoogle = async (req, res) => {
   try {
-    // req.user is set by passport after successful Google OAuth
     const user = req.user;
     if (!user) {
-      return res.status(401).json({ error: "Google authentication failed" });
+      throw createError(401, "Google authentication failed");
     }
-    // Issue JWT
     const payload = {
       userId: user.id,
       email: user.email,
@@ -196,13 +187,14 @@ const loginGoogle = async (req, res) => {
       appConfig.jwt.accessKey.privateKey,
       "1d"
     );
-    return res.status(200).json({
+    return successResponse(res, {
+      statusCode: 200,
       message: "Google login successful",
       token,
       user: payload,
     });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    throw createError(500, err.message);
   }
 };
 const loginMobile = async (req, res) => {
@@ -210,7 +202,15 @@ const loginMobile = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-  // Implement logout logic here
+  try {
+    // Implement logout logic here (stateless JWT, so just respond OK)
+    return successResponse(res, {
+      statusCode: 200,
+      message: "Logout successful",
+    });
+  } catch (err) {
+    throw createError(500, err.message);
+  }
 };
 
 module.exports = {
