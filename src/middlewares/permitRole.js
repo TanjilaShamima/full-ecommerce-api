@@ -3,7 +3,7 @@ const createError = require("http-errors");
 
 /**
  * Middleware for role-based access control
- * @param {...string} allowedRoles - Roles allowed to access the route
+ * @param {array<string>} allowedRoles - Roles allowed to access the route
  */
 const permit = (allowedRoles = []) => {
   return (req, res, next) => {
