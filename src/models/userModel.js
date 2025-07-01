@@ -68,6 +68,26 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    roleId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    requestRoleId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    requestRoleId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    otp: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    otpExpiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     hooks: {
@@ -94,7 +114,7 @@ Address.belongsTo(User, { foreignKey: "userId", as: "user" });
 User.hasOne(ArtisanProfile, { foreignKey: "userId", as: "artisanProfile" });
 ArtisanProfile.belongsTo(User, { foreignKey: "userId", as: "user" });
 
-User.hasOne(Role, { foreignKey: "userId", as: "role" });
-Role.belongsTo(User, { foreignKey: "userId", as: "user" });
+User.belongsTo(Role, { foreignKey: "roleId", as: "role" });
+User.belongsTo(Role, { foreignKey: "requestRoleId", as: "requestRole" });
 
 module.exports = User;

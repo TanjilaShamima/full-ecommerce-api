@@ -1,4 +1,3 @@
-
 /*
  * validateSchema.js
  * Middleware to validate request body against a Joi schema.
@@ -14,13 +13,16 @@ const validateSchema = (schema) => {
     });
 
     if (error) {
-      throw createError(400, "Validation failed", {
-        errors: error.details.map((detail) => detail.message),
-      });
+      throw createError(
+        400,
+        `Validation failed- ${error.details
+          .map((detail) => detail.message)
+          .join(", ")}`
+      );
     }
 
     next();
   };
-}
+};
 
 module.exports = validateSchema;
