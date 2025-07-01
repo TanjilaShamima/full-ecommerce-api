@@ -5,7 +5,7 @@ const createError = require("http-errors");
  * Middleware for role-based access control
  * @param {array<string>} allowedRoles - Roles allowed to access the route
  */
-const permit = (allowedRoles = []) => {
+const permitRole = (allowedRoles = []) => {
   return (req, res, next) => {
     // req.user should be set by isLoggedIn middleware
     const user = req.user;
@@ -19,4 +19,4 @@ const permit = (allowedRoles = []) => {
   };
 };
 
-module.exports = { permit };
+module.exports = permitRole;

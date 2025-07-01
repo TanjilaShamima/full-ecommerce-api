@@ -11,8 +11,8 @@ const roleSchema = Joi.object({
     .valid("super_admin", "admin", "customer", "artisan", "merchant")
     .required(),
   description: Joi.string().max(200).optional(),
-  createdAt: Joi.date().default(() => new Date(), "time of creation"),
-  updatedAt: Joi.date().default(() => new Date(), "time of update"),
+  createdAt: Joi.date().default(() => new Date()),
+  updatedAt: Joi.date().default(() => new Date()),
 });
 /**
  * @typedef {Object} Role

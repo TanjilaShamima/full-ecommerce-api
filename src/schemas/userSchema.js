@@ -25,8 +25,8 @@ const userSchema = Joi.object({
     .valid("customer", "merchant", "artisan", "admin", "super_admin")
     .default("customer"),
   googleId: Joi.string().optional(),
-  createdAt: Joi.date().default(() => new Date(), "time of creation"),
-  updatedAt: Joi.date().default(() => new Date(), "time of update"),
+  createdAt: Joi.date().default(() => new Date()),
+  updatedAt: Joi.date().default(() => new Date()),
   verifiedAt: Joi.date().optional(),
 });
 
