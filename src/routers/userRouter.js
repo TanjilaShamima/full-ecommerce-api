@@ -1,12 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const { getUserById } = require("../controllers/userController");
-const { getMyDetails } = require("../controllers/userController");
-const { updateUserById } = require("../controllers/userController");
-const { deleteUserById } = require("../controllers/userController");
+const { getUserById, getMyDetails, updateUserById, deleteUserById, updatePassword } = require("../controllers/userController");
 const validateSchema = require("../middlewares/validateSchema");
 const userSchema = require("../schemas/userSchema");
-const { resetPass } = require("../controllers/authController");
+const { isLoggedIn } = require("../middlewares/auth");
+const {
+  getAllAddressesByUserId,
+  createAddressByUserId,
+  deleteAddressByUserId,
+  updateAddressByUserId,
+} = require("../controllers/addressController");
+const addressSchema = require("../schemas/addressSchema");
+const { createArtisanProfile, getArtisanById, updateArtisanById } = require("../controllers/artisanProfileController");
+const artisanProfileSchema = require("../schemas/artisanProfileSchema");
 
 /**
  * @swagger
@@ -22,34 +28,79 @@ const { resetPass } = require("../controllers/authController");
  *     tags: [User]
  *   put:
  *     summary: Update user by ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User updated successfully
  *   delete:
  *     summary: Delete user by ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
  */
 router.get("/:id", getUserById);
-router.put("/:id", validateSchema(userSchema), updateUserById);
-router.delete("/:id", deleteUserById);
+router.put("/:id", isLoggedIn, validateSchema(userSchema), updateUserById);
+router.delete("/:id", isLoggedIn, deleteUserById);
 /**
  * @swagger
  * /users/me:
  *   get:
  *     summary: Get my details
+ *     security:
+ *       - bearerAuth: []
  *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: My user details
  */
-router.get("/me", getMyDetails);
-
-const {
-  getAllAddressesByUserId,
-  createAddressByUserId,
-  deleteAddressByUserId,
-  updateAddressByUserId,
-} = require("../controllers/addressController");
-const addressSchema = require("../schemas/addressSchema");
-const { createArtisanProfile, getArtisanById, updateArtisanById } = require("../controllers/artisanProfileController");
-const artisanProfileSchema = require("../schemas/artisanProfileSchema");
-
+router.get("/me", isLoggedIn, getMyDetails);
 /**
+ * @swagger
+ * /users/update-password:
+ *   post:
+ *     summary: Update password for logged-in user
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - oldPassword
+ *               - newPassword
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *             example:
+ *               oldPassword: OldPass123!
+ *               newPassword: NewPass456!
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Old password is incorrect
+ */
+router.post("/update-password", isLoggedIn, updatePassword);
+
+ /**
  * @swagger
  * tags:
  *   name: Address
@@ -156,36 +207,5 @@ router.post("/:id/artisan", validateSchema(artisanProfileSchema), createArtisanP
  *         description: Bad request
  */
 router.put("/:id/artisan", validateSchema(artisanProfileSchema), updateArtisanById);
-
-/**
- * @swagger
- * /users/reset-pass:
- *   post:
- *     summary: Set new password using reset token (after email link)
- *     tags: [User]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - token
- *               - newPassword
- *             properties:
- *               token:
- *                 type: string
- *               newPassword:
- *                 type: string
- *             example:
- *               token: "reset-token-from-email"
- *               newPassword: "NewStrongPass123!"
- *     responses:
- *       200:
- *         description: Password reset successful
- *       400:
- *         description: Invalid or expired token
- */
-router.post("/reset-pass", resetPass);
 
 module.exports = router;
