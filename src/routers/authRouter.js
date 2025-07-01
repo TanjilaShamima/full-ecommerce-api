@@ -43,7 +43,7 @@ const { loginGoogle } = require("../controllers/authController");
  *                 type: string
  *               mobile:
  *                 type: string
- *               requestRole:
+ *               role:
  *                 type: string
  *               password:
  *                 type: string
@@ -52,7 +52,7 @@ const { loginGoogle } = require("../controllers/authController");
  *               fullName: John Doe
  *               mobile: "01700000000"
  *               password: StrongPass123!
- *               requestRole: "artisan"
+ *               role: "artisan"
  *     responses:
  *       201:
  *         description: User registered successfully

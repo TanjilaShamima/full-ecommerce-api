@@ -88,8 +88,10 @@ const loginUser = async (req, res) => {
     );
     return successResponse(res, {
       message: "Login successful",
-      token,
-      user: payload,
+      payload: {
+        ...foundUser.dataValues,
+        token: token
+      }
     });
   } catch (err) {
     throw createError(err);

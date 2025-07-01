@@ -35,6 +35,8 @@ const getAllUsers = async (req, res) => {
         page,
         limit,
         totalPages: Math.ceil(count / limit),
+        prev: page > 1 ? page - 1 : null,
+        next: count > offset + limit ? page + 1 : null,
       },
     });
   } catch (error) {
