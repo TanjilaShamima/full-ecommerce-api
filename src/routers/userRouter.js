@@ -45,7 +45,7 @@ const {
   updateAddressByUserId,
 } = require("../controllers/addressController");
 const addressSchema = require("../schemas/addressSchema");
-const { getArtisanById, updateArtisanById } = require("../controllers/artisanProfileController");
+const { createArtisanProfile, getArtisanById, updateArtisanById } = require("../controllers/artisanProfileController");
 const artisanProfileSchema = require("../schemas/artisanProfileSchema");
 
 /**
@@ -96,6 +96,64 @@ router.put("/:id/addresses/:addressId", validateSchema(addressSchema), updateAdd
  *     tags: [Artisan]
  */
 router.get("/:id/artisan", getArtisanById);
+/**
+ * @swagger
+ * /users/{id}/artisan:
+ *   post:
+ *     summary: Create artisan profile for user
+ *     tags: [Artisan]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ArtisanProfile'
+ *     responses:
+ *       201:
+ *         description: Artisan profile created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ArtisanProfile'
+ *       400:
+ *         description: Bad request
+ */
+router.post("/:id/artisan", validateSchema(artisanProfileSchema), createArtisanProfile);
+
+/**
+ * @swagger
+ * /users/{id}/artisan:
+ *   put:
+ *     summary: Update artisan profile by user ID
+ *     tags: [Artisan]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ArtisanProfile'
+ *     responses:
+ *       200:
+ *         description: Artisan profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ArtisanProfile'
+ *       400:
+ *         description: Bad request
+ */
 router.put("/:id/artisan", validateSchema(artisanProfileSchema), updateArtisanById);
 
 module.exports = router;
