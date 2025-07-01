@@ -95,12 +95,35 @@ router.post("/register-google", registerUserWithGoogle);
 router.post("/login", loginUser);
 /**
  * @swagger
- * /auth/verify-user:
+ * /auth/verify-user/{id}:
  *   post:
- *     summary: Verify user
+ *     summary: Verify user with OTP
  *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - otp
+ *             properties:
+ *               otp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User verified successfully
+ *       400:
+ *         description: Invalid or expired OTP
  */
-router.post("/verify-user", verifyUser);
+router.post("/verify-user/:id", verifyUser);
 /**
  * @swagger
  * /auth/forget-pass:

@@ -3,27 +3,39 @@
 const User = require("../models/userModel");
 const Role = require("../models/roleModel");
 const { Op } = require("sequelize");
-const createError = require('http-errors');
+const createError = require("http-errors");
 const { successResponse } = require("../services/response");
 const { verifyEmailTemplate } = require("../utils/emailTemplate");
 const { sendWithNodemailer } = require("../services/emailServices");
 
 const registerUser = async (req, res) => {
   try {
-    const { email, fullName, mobile, password, requestRole: requestRoleName } = req.body;
+    const {
+      email,
+      fullName,
+      mobile,
+      password,
+      requestRole: requestRoleName,
+    } = req.body;
     // Check if user already exists
-    const existingUser = await User.findOne({ where: { [Op.or]: [{ email }, { mobile }] } });
+    const existingUser = await User.findOne({
+      where: { [Op.or]: [{ email }, { mobile }] },
+    });
     if (existingUser) {
       throw createError(400, "User with this email or mobile already exists");
     }
     // Find the 'customer' role for default
-    const customerRole = await Role.findOne({ where: { permissions: "customer" } });
+    const customerRole = await Role.findOne({
+      where: { permissions: "customer" },
+    });
     if (!customerRole) {
       throw createError(500, "Default customer role not found in Roles table");
     }
     let requestRoleId = null;
     if (requestRoleName) {
-      const reqRole = await Role.findOne({ where: { permissions: requestRoleName } });
+      const reqRole = await Role.findOne({
+        where: { permissions: requestRoleName },
+      });
       if (!reqRole) {
         throw createError(400, "Requested role does not exist");
       }
@@ -50,39 +62,63 @@ const registerUser = async (req, res) => {
     await sendWithNodemailer(emailData);
     successResponse(res, {
       statusCode: 201,
-      message: "User registered successfully. One otp is send to user mail. Please verify!",
-      payload: user
+      message:
+        "User registered successfully. One otp is send to user mail. Please verify!",
+      payload: user,
     });
   } catch (err) {
     throw createError(err);
   }
 };
 
-const loginUser = async(req, res) => {
+const loginUser = async (req, res) => {
   // Implement login logic here
-}
+};
 
-const verifyUser = async(req, res) => {
-  // Implement user verification logic here
-}
-
-const forgetPass = async(req, res) => {
+const verifyUser = async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const { id } = req.params;
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw createError(404, "User not found");
+    }
+    if (user.otp !== otp) {
+      throw createError(400, "Invalid OTP");
+    }
+    if (user.otpExpiresAt < new Date()) {
+      throw createError(400, "OTP expired");
+    }
+    user.otp = null;
+    user.otpExpiresAt = null;
+    user.verifiedAt = new Date();
+    user.status = true;
+    await user.save();
+    successResponse(res, {
+      statusCode: 200,
+      message: "User verified successfully",
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+const forgetPass = async (req, res) => {
   // Implement password reset logic here
-}
+};
 
-const resetPass = async(req, res) => {
+const resetPass = async (req, res) => {
   // Implement password reset logic here
-}
-const loginGoogle = async(req, res) => {
+};
+const loginGoogle = async (req, res) => {
   // Implement Google login logic here
-}
-const loginMobile = async(req, res) => {
+};
+const loginMobile = async (req, res) => {
   // Implement mobile login logic here
-}
+};
 
-const logout = async(req, res) => {
+const logout = async (req, res) => {
   // Implement logout logic here
-}
+};
 
 const registerUserWithGoogle = async (req, res) => {
   try {
@@ -109,7 +145,9 @@ const registerUserWithGoogle = async (req, res) => {
         status: true,
       });
     }
-    res.status(201).json({ message: "User registered with Google successfully", user });
+    res
+      .status(201)
+      .json({ message: "User registered with Google successfully", user });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
