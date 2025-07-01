@@ -20,7 +20,7 @@ app.use("/api/v1", indexRouter);
 
 // swagger setup
 app.use(
-  "/api-docs",
+  "/api/docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerDocs, {
     swaggerOptions: { deepLinking: false },
@@ -48,6 +48,6 @@ app.use((err, req, res, next) => {
 // app listen, DB connection, and server start
 app.listen(appConfig.port, async () => {
   logger.info(`Server is running on ${appConfig.appDomain}`);
-  logger.info(`API Documentation: ${appConfig.appDomain}/api-docs`);
+  logger.info(`API Documentation: ${appConfig.appDomain}/api/docs`);
   await connectToDatabase();
 });

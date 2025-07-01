@@ -5,7 +5,7 @@ User Schema
 const Joi = require("joi");
 
 const userSchema = Joi.object({
-  username: Joi.string().min(3).max(30).required(),
+  username: Joi.string().min(3).max(20).required(),
   password: Joi.string().min(8).max(100).required(),
   email: Joi.string().email().required(),
   fullName: Joi.string().min(1).max(50).optional(),
@@ -22,7 +22,7 @@ const userSchema = Joi.object({
     )
     .required(),
   role: Joi.string()
-    .valid("customer", "delivery", "cook", "admin", "super_admin")
+    .valid("customer", "merchant", "artisan", "admin", "super_admin")
     .default("customer"),
   googleId: Joi.string().optional(),
   createdAt: Joi.date().default(() => new Date(), "time of creation"),
