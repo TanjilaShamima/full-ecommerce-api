@@ -7,6 +7,8 @@ const createError = require("http-errors");
 const { successResponse } = require("../services/response");
 const { verifyEmailTemplate } = require("../utils/emailTemplate");
 const { sendWithNodemailer } = require("../services/emailServices");
+const { createJsonWebToken } = require("../services/jsonWebToken");
+const appConfig = require("../config/constant");
 
 const registerUser = async (req, res) => {
   try {
@@ -110,7 +112,33 @@ const resetPass = async (req, res) => {
   // Implement password reset logic here
 };
 const loginGoogle = async (req, res) => {
-  // Implement Google login logic here
+  try {
+    // req.user is set by passport after successful Google OAuth
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ error: "Google authentication failed" });
+    }
+    // Issue JWT
+    const payload = {
+      userId: user.id,
+      email: user.email,
+      role: user.roleId,
+      fullName: user.fullName,
+      googleId: user.googleId,
+    };
+    const token = createJsonWebToken(
+      payload,
+      appConfig.jwt.accessKey.privateKey,
+      "1d"
+    );
+    return res.status(200).json({
+      message: "Google login successful",
+      token,
+      user: payload,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 };
 const loginMobile = async (req, res) => {
   // Implement mobile login logic here
