@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const { Op } = require("sequelize");
 const createError = require("http-errors");
+const { successResponse } = require("../services/response");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -28,9 +29,13 @@ const getAllUsers = async (req, res) => {
       order: [["createdAt", "DESC"]],
       attributes: { exclude: ["password", "otp", "otpExpiresAt"] },
     });
-    res.status(200).json({
-      users,
-      pagination: {
+    return successResponse(res, {
+      statusCode: 200,
+      message: "Users loaded successfully",
+      payload: {
+        users,
+      },
+      meta: {
         total: count,
         page,
         limit,
@@ -40,7 +45,7 @@ const getAllUsers = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to retrieve users" });
+    throw createError(500, "Failed to retrieve users");
   }
 };
 
@@ -49,12 +54,15 @@ const updateUsersRoleById = async (req, res) => {
     const userId = req.params.id;
     const { role } = req.body;
     const user = await User.findByPk(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) throw createError(404, "User not found");
     user.role = role;
     await user.save();
-    res.status(200).json({ message: `User role updated for ID: ${userId}` });
+    return successResponse(res, {
+      statusCode: 200,
+      message: `User role updated for ID: ${userId}`,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Failed to update user role" });
+    throw createError(500, "Failed to update user role");
   }
 };
 
@@ -62,15 +70,19 @@ const approvedUserRole = async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await User.findByPk(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    if (!user.requestRoleId)
-      return res.status(400).json({ error: "No requested role to approve" });
-    user.roleId = user.requestRoleId;
-    user.requestRoleId = null;
+    if (!user) throw createError(404, "User not found");
+    if (!user.requestRole)
+      throw createError(400, "No requested role to approve");
+    user.role = user.requestRole;
+    user.requestRole = null;
+    user.status = user.role === "artisan" ? "pending" : "active";
     await user.save();
-    res.status(200).json({ message: `User role approved for ID: ${userId}` });
+    return successResponse(res, {
+      statusCode: 200,
+      message: `User role approved for ID: ${userId}`,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Failed to approve user role" });
+    throw createError(500, "Failed to approve user role");
   }
 };
 
@@ -81,8 +93,8 @@ const getAllRoleRequests = async (req, res) => {
     limit = parseInt(limit);
     const offset = (page - 1) * limit;
     const where = {
-      role: 'artisan',
-      status: 'pending',
+      role: "artisan",
+      status: "pending",
       ...(search
         ? {
             [Op.or]: [
@@ -100,17 +112,21 @@ const getAllRoleRequests = async (req, res) => {
       order: [["createdAt", "DESC"]],
       attributes: { exclude: ["password", "otp", "otpExpiresAt"] },
     });
-    res.status(200).json({
-      users,
-      pagination: {
-        total: count,
-        page,
-        limit,
-        totalPages: Math.ceil(count / limit),
+    return successResponse(res, {
+      statusCode: 200,
+      message: "Role requests loaded successfully",
+      payload: {
+        users,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
       },
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to retrieve role requests" });
+    throw createError(500, "Failed to retrieve role requests");
   }
 };
 
