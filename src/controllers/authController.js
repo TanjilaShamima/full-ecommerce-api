@@ -87,8 +87,10 @@ const loginUser = async (req, res) => {
     return successResponse(res, {
       statusCode: 200,
       message: "Login successful",
-      token,
-      user: payload,
+      payload: {
+        ...foundUser.dataValues,
+        token
+      }
     });
   } catch (err) {
     throw createError(err.status || 500, err.message);
@@ -190,8 +192,10 @@ const loginGoogle = async (req, res) => {
     return successResponse(res, {
       statusCode: 200,
       message: "Google login successful",
-      token,
-      user: payload,
+      payload: {
+        ...user,
+        token
+      }
     });
   } catch (err) {
     throw createError(500, err.message);

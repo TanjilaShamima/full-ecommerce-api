@@ -117,12 +117,12 @@ const getAllRoleRequests = async (req, res) => {
       message: "Role requests loaded successfully",
       payload: {
         users,
-        pagination: {
-          total: count,
-          page,
-          limit,
-          totalPages: Math.ceil(count / limit),
-        },
+      },
+      meta: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
       },
     });
   } catch (error) {
