@@ -14,8 +14,20 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   name: Story
- *   description: Story management and operations
+ *   - name: Auth
+ *     description: Authentication and login
+ *   - name: Admin
+ *     description: Admin management and operations
+ *   - name: Craft Type
+ *     description: Craft type management and operations
+ *   - name: User
+ *     description: User management and operations
+ *   - name: Address
+ *     description: Address management and operations
+ *   - name: Artisan
+ *     description: Artisan management and operations
+ *   - name: Story
+ *     description: Story management and operations
  */
 
 /**
