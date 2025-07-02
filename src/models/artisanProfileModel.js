@@ -37,4 +37,13 @@ const ArtisanProfile = sequelize.define("ArtisanProfile", {
   },
 });
 
+// ArtisanProfile.hasOne(Story, {
+//   foreignKey: "artisanProfileId",
+//   as: "story",
+// });
+// Story.belongsTo(ArtisanProfile, {
+//   foreignKey: "artisanProfileId",
+//   as: "artisanProfile",
+// });
+
 module.exports = ArtisanProfile;

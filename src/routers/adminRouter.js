@@ -63,7 +63,7 @@ const {
  *                 users:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/User'
+ *                     $ref: '#/src/schemas/User'
  *                 pagination:
  *                   type: object
  *                   properties:
@@ -206,7 +206,7 @@ router.post(
 //  *                 users:
 //  *                   type: array
 //  *                   items:
-//  *                     $ref: '#/components/schemas/User'
+//  *                     $ref: '#/src/schemas/User'
 //  *                 pagination:
 //  *                   type: object
 //  *                   properties:

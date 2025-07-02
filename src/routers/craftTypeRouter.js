@@ -58,7 +58,7 @@ const { isLoggedIn } = require("../middlewares/auth");
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Craft Type'
+ *               $ref: '#/src/schemas/Craft Type'
  *       400:
  *         description: Bad request
  *   get:
@@ -72,7 +72,7 @@ const { isLoggedIn } = require("../middlewares/auth");
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Craft Type'
+ *                 $ref: '#/src/schemas/Craft Type'
  */
 /**
  * @swagger
@@ -110,7 +110,7 @@ const { isLoggedIn } = require("../middlewares/auth");
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Craft Type'
+ *               $ref: '#/src/schemas/Craft Type'
  *       404:
  *         description: Craft type not found
  *   delete:

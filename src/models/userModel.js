@@ -8,6 +8,7 @@ const sequelize = require("../config/sequelize");
 const bcrypt = require("bcrypt");
 const Address = require("./addressModel");
 const ArtisanProfile = require("./artisanProfileModel");
+const Story = require("./storyModel");
 
 const User = sequelize.define(
   "User",
@@ -112,5 +113,15 @@ Address.belongsTo(User, { foreignKey: "userId", as: "user" });
 
 User.hasOne(ArtisanProfile, { foreignKey: "userId", as: "artisanProfile" });
 ArtisanProfile.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+
+User.hasOne(Story, {
+  foreignKey: "userId",
+  as: "story",
+});
+Story.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
+});
 
 module.exports = User;

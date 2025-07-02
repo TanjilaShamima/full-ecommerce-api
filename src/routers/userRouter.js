@@ -23,6 +23,7 @@ const {
 const { isLoggedIn } = require("../middlewares/auth");
 const { uploader } = require("../middlewares/upload");
 const artisanProfileSchema = require("../schemas/artisanProfileSchema");
+const storyRouter = require("./storyRouter");
 
 /**
  * @swagger
@@ -45,7 +46,7 @@ const artisanProfileSchema = require("../schemas/artisanProfileSchema");
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/src/schemas/User'
  *       401:
  *         description: Unauthorized
  *       404:
@@ -71,7 +72,7 @@ router.get("/me", isLoggedIn, getMyDetails);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/src/schemas/User'
  *       404:
  *         description: User not found
  *   put:
@@ -117,7 +118,7 @@ router.get("/me", isLoggedIn, getMyDetails);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/src/schemas/User'
  *       400:
  *         description: Bad request
  *       403:
@@ -177,7 +178,7 @@ router.delete("/:id", deleteUserById);
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Address'
+ *                 $ref: '#/src/schemas/Address'
  *   post:
  *     summary: Create address by user ID
  *     security:
@@ -195,14 +196,14 @@ router.delete("/:id", deleteUserById);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Address'
+ *             $ref: '#/src/schemas/Address'
  *     responses:
  *       201:
  *         description: Address created
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Address'
+ *               $ref: '#/src/schemas/Address'
  *       400:
  *         description: Bad request
  */
@@ -239,14 +240,14 @@ router.post(
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Address'
+ *             $ref: '#/src/schemas/Address'
  *     responses:
  *       200:
  *         description: Address updated
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Address'
+ *               $ref: '#/src/schemas/Address'
  *       400:
  *         description: Bad request
  *       403:
@@ -546,4 +547,7 @@ router.post("/update-password", updatePassword);
  *         postalCode: "1207"
  *         country: "Bangladesh"
  */
+
+router.use("/:id/stories", isLoggedIn, storyRouter);
+
 module.exports = router;
