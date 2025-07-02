@@ -4,6 +4,11 @@ const User = require("../models/userModel");
 const createError = require("http-errors");
 const bcrypt = require("bcrypt");
 const { successResponse } = require("../services/response");
+const {
+  removeAllSizesImageFromS3,
+  processUploadedImagesToS3,
+} = require("../middlewares/upload");
+const logger = require("../utils/logger");
 
 const getUserById = async (req, res) => {
   try {
@@ -46,10 +51,23 @@ const updateUserById = async (req, res) => {
     }
     const user = await User.findByPk(userId);
     if (!user) throw createError(404, "User not found");
-    const updatableFields = ["fullName", "dateOfBirth", "gender", "mobile", "images"];
+    // Only update provided fields
+    const updatableFields = ["fullName", "dateOfBirth", "gender", "mobile"];
     updatableFields.forEach((field) => {
       if (req.body[field] !== undefined) user[field] = req.body[field];
+      else user[field] = user[field];
     });
+    // Handle image upload (S3)
+    if (req.file) {
+      logger.info("req.file", req.file);
+      if (user.image) {
+        await removeAllSizesImageFromS3(user.image);
+      }
+      user.image = await processUploadedImagesToS3(
+        req.file.buffer,
+        req.file.originalname
+      );
+    }
     await user.save();
     return successResponse(res, {
       statusCode: 200,

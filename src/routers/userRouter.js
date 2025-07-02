@@ -22,6 +22,7 @@ const {
 } = require("../controllers/artisanProfileController");
 const artisanProfileSchema = require("../schemas/artisanProfileSchema");
 const { isLoggedIn } = require("../middlewares/auth");
+const { uploader } = require("../middlewares/upload");
 
 /**
  * @swagger
@@ -56,8 +57,6 @@ router.get("/me", isLoggedIn, getMyDetails);
  * /users/{id}:
  *   get:
  *     summary: Get user by ID
- *     security:
- *       - bearerAuth: []
  *     tags: [User]
  *     parameters:
  *       - in: path
@@ -88,11 +87,30 @@ router.get("/me", isLoggedIn, getMyDetails);
  *           type: string
  *         description: User ID
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: Jane Doe
+ *               dateOfBirth:
+ *                 type: string
+ *                 format: date
+ *                 example: 1990-01-01
+ *               gender:
+ *                 type: string
+ *                 enum: [male, female, other]
+ *                 example: female
+ *               mobile:
+ *                 type: string
+ *                 example: "01700000000"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Single image file upload
  *     responses:
  *       200:
  *         description: User updated successfully
@@ -127,7 +145,12 @@ router.get("/me", isLoggedIn, getMyDetails);
  *         description: User not found
  */
 router.get("/:id", getUserById);
-router.put("/:id", validateSchema(userSchema), updateUserById);
+router.put(
+  "/:id",
+  isLoggedIn,
+  uploader.single("image"),
+  updateUserById
+);
 router.delete("/:id", deleteUserById);
 
 /**

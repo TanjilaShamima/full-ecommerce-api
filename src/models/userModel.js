@@ -47,7 +47,7 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    images: {
+    image: {
       type: DataTypes.JSONB, // Using JSONB to allow flexible structure for images
       allowNull: true,
       defaultValue: null, // Allow null or empty images

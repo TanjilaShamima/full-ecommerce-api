@@ -8,9 +8,9 @@ const appConfig = require("./constant");
 
 
 const s3 = new AWS.S3({
-  accessKeyId: appConfig.s3.accessKeyId,
-  secretAccessKey: appConfig.s3.secretAccessKey,
-  region: appConfig.s3.region,
+  accessKeyId: appConfig.aws.accessKeyId,
+  secretAccessKey: appConfig.aws.secretAccessKey,
+  region: appConfig.aws.region,
 });
 
 module.exports = s3;

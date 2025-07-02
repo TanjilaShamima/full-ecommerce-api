@@ -21,7 +21,7 @@ const userSchema = Joi.object({
     })),
   gender: Joi.string().valid("male", "female", "other").optional(),
   mobile: Joi.string().pattern(/^[0-9]{10,15}$/).optional(),
-  images: Joi.object().optional().allow(null),
+  image: Joi.object().optional().allow(null),
   role: Joi.string()
     .valid("super_admin", "admin", "customer", "artisan", "merchant")
     .default("customer"),
