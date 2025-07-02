@@ -31,7 +31,7 @@ const { uploader } = require("../middlewares/upload");
  *   description: User APIs
  */
 
- /**
+/**
  * @swagger
  * /users/me:
  *   get:
@@ -145,12 +145,7 @@ router.get("/me", isLoggedIn, getMyDetails);
  *         description: User not found
  */
 router.get("/:id", getUserById);
-router.put(
-  "/:id",
-  isLoggedIn,
-  uploader.single("image"),
-  updateUserById
-);
+router.put("/:id", isLoggedIn, uploader.single("image"), updateUserById);
 router.delete("/:id", deleteUserById);
 
 /**
@@ -335,11 +330,41 @@ router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
  *           type: string
  *         description: User ID
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/ArtisanProfile'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Jane Artisan"
+ *               tagLine:
+ *                 type: string
+ *                 example: "Handmade with love"
+ *               district:
+ *                 type: string
+ *                 example: "Dhaka"
+ *               city:
+ *                 type: string
+ *                 example: "Dhaka"
+ *               productType:
+ *                 type: string
+ *                 enum: [pottery, textile, jewelry, woodwork, painting, other]
+ *                 example: pottery
+ *               socialMedia:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://instagram.com/janeartisan"
+ *               about:
+ *                 type: string
+ *                 example: "I create unique pottery pieces."
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Upload up to 3 images
  *     responses:
  *       200:
  *         description: Artisan profile updated successfully
@@ -353,6 +378,8 @@ router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
  *         description: Artisan profile not found
  */
 router.get("/:id/artisan", getArtisanById);
+router.put("/:id/artisan", uploader.array("images", 3), updateArtisanById);
+
 /**
  * @swagger
  * /users/{id}/artisan:
@@ -368,9 +395,39 @@ router.get("/:id/artisan", getArtisanById);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/ArtisanProfile'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Jane Artisan"
+ *               tagLine:
+ *                 type: string
+ *                 example: "Handmade with love"
+ *               district:
+ *                 type: string
+ *                 example: "Dhaka"
+ *               city:
+ *                 type: string
+ *                 example: "Dhaka"
+ *               productType:
+ *                 type: string
+ *                 enum: [pottery, textile, jewelry, woodwork, painting, other]
+ *                 example: pottery
+ *               socialMedia:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://instagram.com/janeartisan"
+ *               about:
+ *                 type: string
+ *                 example: "I create unique pottery pieces."
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Upload up to 3 images
  *     responses:
  *       201:
  *         description: Artisan profile created successfully
@@ -381,45 +438,7 @@ router.get("/:id/artisan", getArtisanById);
  *       400:
  *         description: Bad request
  */
-router.post(
-  "/:id/artisan",
-  validateSchema(artisanProfileSchema),
-  createArtisanProfile
-);
-
-/**
- * @swagger
- * /users/{id}/artisan:
- *   put:
- *     summary: Update artisan profile by user ID
- *     tags: [Artisan]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/ArtisanProfile'
- *     responses:
- *       200:
- *         description: Artisan profile updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ArtisanProfile'
- *       400:
- *         description: Bad request
- */
-router.put(
-  "/:id/artisan",
-  validateSchema(artisanProfileSchema),
-  updateArtisanById
-);
+router.post("/:id/artisan", uploader.array("images", 3), createArtisanProfile);
 
 /**
  * @swagger
