@@ -164,7 +164,7 @@ router.patch(
  *       404:
  *         description: User not found
  */
-router.patch(
+router.post(
   '/approved-role/:id',
   isLoggedIn,
   permitRole(["admin", "super_admin"]),

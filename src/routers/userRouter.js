@@ -20,9 +20,9 @@ const {
   getArtisanById,
   updateArtisanById,
 } = require("../controllers/artisanProfileController");
-const artisanProfileSchema = require("../schemas/artisanProfileSchema");
 const { isLoggedIn } = require("../middlewares/auth");
 const { uploader } = require("../middlewares/upload");
+const artisanProfileSchema = require("../schemas/artisanProfileSchema");
 
 /**
  * @swagger
@@ -314,7 +314,19 @@ router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ArtisanProfile'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 statusCode:
+ *                   type: integer
+ *                 message:
+ *                   type: string
+ *                 result:
+ *                   type: object
+ *                   properties:
+ *                     artisanProfile:
+ *                       $ref: '#/src/schemas/ArtisanProfile'
  *       404:
  *         description: Artisan profile not found
  *   put:
@@ -371,18 +383,23 @@ router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ArtisanProfile'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 statusCode:
+ *                   type: integer
+ *                 message:
+ *                   type: string
+ *                 result:
+ *                   type: object
+ *                   properties:
+ *                     artisanProfile:
+ *                       $ref: '#/src/schemas/ArtisanProfile'
  *       400:
  *         description: Bad request
  *       404:
  *         description: Artisan profile not found
- */
-router.get("/:id/artisan", getArtisanById);
-router.put("/:id/artisan", uploader.array("images", 3), updateArtisanById);
-
-/**
- * @swagger
- * /users/{id}/artisan:
  *   post:
  *     summary: Create artisan profile for user
  *     tags: [Artisan]
@@ -434,11 +451,34 @@ router.put("/:id/artisan", uploader.array("images", 3), updateArtisanById);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ArtisanProfile'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 statusCode:
+ *                   type: integer
+ *                 message:
+ *                   type: string
+ *                 result:
+ *                   type: object
+ *                   properties:
+ *                     artisanProfile:
+ *                       $ref: '#/src/schemas/ArtisanProfile'
  *       400:
  *         description: Bad request
  */
-router.post("/:id/artisan", uploader.array("images", 3), createArtisanProfile);
+router.get("/:id/artisan", getArtisanById);
+router.put(
+  "/:id/artisan",
+  uploader.array("images", 3),
+  updateArtisanById
+);
+router.post(
+  "/:id/artisan",
+  uploader.array("images", 3),
+  validateSchema(artisanProfileSchema),
+  createArtisanProfile
+);
 
 /**
  * @swagger

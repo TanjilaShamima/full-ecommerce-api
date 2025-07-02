@@ -3,6 +3,7 @@
 const ArtisanProfile = require("../models/artisanProfileModel");
 const createError = require("http-errors");
 const { successResponse } = require("../services/response");
+const { processUploadedImagesToS3, removeAllSizesImageFromS3 } = require("../middlewares/upload");
 
 const getArtisanById = async (req, res) => {
   try {

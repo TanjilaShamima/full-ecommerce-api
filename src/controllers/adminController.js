@@ -71,18 +71,14 @@ const approvedUserRole = async (req, res) => {
     const userId = req.params.id;
     const user = await User.findByPk(userId);
     if (!user) throw createError(404, "User not found");
-    if (!user.requestRole)
-      throw createError(400, "No requested role to approve");
-    user.role = user.requestRole;
-    user.requestRole = null;
-    user.status = user.role === "artisan" ? "pending" : "active";
+    user.status = "active";
     await user.save();
     return successResponse(res, {
       statusCode: 200,
       message: `User role approved for ID: ${userId}`,
     });
   } catch (error) {
-    throw createError(500, "Failed to approve user role");
+    throw createError(error);
   }
 };
 
