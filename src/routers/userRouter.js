@@ -403,6 +403,8 @@ router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
  *         description: Artisan profile not found
  *   post:
  *     summary: Create artisan profile for user
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Artisan]
  *     parameters:
  *       - in: path
@@ -471,13 +473,15 @@ router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
 router.get("/:id/artisan", getArtisanById);
 router.put(
   "/:id/artisan",
+  isLoggedIn,
   uploader.array("images", 3),
   updateArtisanById
 );
 router.post(
   "/:id/artisan",
-  uploader.array("images", 3),
+  isLoggedIn,
   validateSchema(artisanProfileSchema),
+  uploader.array("images", 3),
   createArtisanProfile
 );
 

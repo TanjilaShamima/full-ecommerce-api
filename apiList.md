@@ -51,3 +51,33 @@
 - `GET /users/{id}/stories/{id}` — Get a story by ID
 - `PUT /users/{id}/stories/{id}` — Update a story by ID
 - `DELETE /users/{id}/stories/{id}` — Delete a story by ID
+
+## Product
+
+- `POST /products` — addProducts
+- `GET /products` — getAllProducts
+- `GET /products/{id}` — getProductsById
+- `PUT /products/{id}` — updateProductsById
+
+## Reviews
+
+- `POST /reviews` — addNewReview
+- `GET /reviews` — getAllReviews
+- `GET /reviews/{id}` — getReviewById
+- `PUT /reviews/{id}` — updateReviewById
+- `DELETE /reviews/{id}` — deleteReviewById
+
+## Cart
+
+- `GET /cart` — getMyCartDetails
+- `POST /cart/products/{productId}` — addProductInCart
+- `DELETE /cart/products/{productId}` — deleteProductFromCart
+- `PATCH /cart/products/{prodId}` — increment or decrement
+- `DELETE /cart/{id}` — deleteCartById
+
+## Order
+
+- `POST /orders` — createNewOrders
+- `GET /orders` — getMyAllOrders
+- `GET /orders/{id}` — getOrderById
+- `PATCH /orders/{id}/status` — updateOrderStatus

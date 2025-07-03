@@ -3,33 +3,20 @@
  * @description This file defines all the necessary routers for story-related operations.
  */
 
-
 const express = require("express");
-const { createStory, getAllStories, getStoryById, updateStory, deleteStory } = require("../controllers/storyController");
+const {
+  createStory,
+  getAllStories,
+  getStoryById,
+  updateStory,
+  deleteStory,
+} = require("../controllers/storyController");
 const validateSchema = require("../middlewares/validateSchema");
 const storySchema = require("../schemas/storySchema");
 const { uploader } = require("../middlewares/upload");
+const { isLoggedIn } = require("../middlewares/auth");
 
 const router = express.Router();
-
-/**
- * @swagger
- * tags:
- *   - name: Auth
- *     description: Authentication and login
- *   - name: Admin
- *     description: Admin management and operations
- *   - name: Craft Type
- *     description: Craft type management and operations
- *   - name: User
- *     description: User management and operations
- *   - name: Address
- *     description: Address management and operations
- *   - name: Artisan
- *     description: Artisan management and operations
- *   - name: Story
- *     description: Story management and operations
- */
 
 /**
  * @swagger
@@ -140,6 +127,8 @@ const router = express.Router();
  * /users/{id}/stories:
  *   post:
  *     summary: Create a new story for a user
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Story]
  *     consumes:
  *       - multipart/form-data
@@ -231,6 +220,8 @@ const router = express.Router();
  * /users/{id}/stories/{id}:
  *   put:
  *     summary: Update a story by ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Story]
  *     consumes:
  *       - multipart/form-data
@@ -281,6 +272,8 @@ const router = express.Router();
  * /users/{id}/stories/{id}:
  *   delete:
  *     summary: Delete a story by ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [Story]
  *     parameters:
  *       - in: path
@@ -296,10 +289,16 @@ const router = express.Router();
  *         description: Story not found
  */
 
-router.post("/", validateSchema(storySchema), uploader.array("images", 3), createStory);
+router.post(
+  "/",
+  isLoggedIn,
+  validateSchema(storySchema),
+  uploader.array("images", 3),
+  createStory
+);
 router.get("/", getAllStories);
 router.get("/:id", getStoryById);
-router.put("/:id",  updateStory);
-router.delete("/:id", deleteStory);
+router.put("/:id", isLoggedIn, uploader.array("images", 3), updateStory);
+router.delete("/:id", isLoggedIn, deleteStory);
 
 module.exports = router;
