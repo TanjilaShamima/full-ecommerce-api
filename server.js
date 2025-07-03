@@ -27,6 +27,10 @@ app.use(
   })
 );
 
+// serve static files from the 'uploads' directory
+app.use("/uploads/images", express.static("uploads"));
+app.use("/uploads/videos", express.static("uploads"));
+
 // catch 404 or not found route and forward to error handler
 app.use((req, res, next) => {
   next(createError(404, "This route does not exist"));

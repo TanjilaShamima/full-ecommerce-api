@@ -8,6 +8,7 @@ const express = require("express");
 const { createStory, getAllStories, getStoryById, updateStory, deleteStory } = require("../controllers/storyController");
 const validateSchema = require("../middlewares/validateSchema");
 const storySchema = require("../schemas/storySchema");
+const { uploader } = require("../middlewares/upload");
 
 const router = express.Router();
 
@@ -34,6 +35,79 @@ const router = express.Router();
  * @swagger
  * components:
  *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         username:
+ *           type: string
+ *         firstName:
+ *           type: string
+ *         lastName:
+ *           type: string
+ *         email:
+ *           type: string
+ *         role:
+ *           type: string
+ *     Address:
+ *       type: object
+ *       required:
+ *         - addressLine1
+ *         - city
+ *         - state
+ *         - postalCode
+ *         - country
+ *       properties:
+ *         addressLine1:
+ *           type: string
+ *         addressLine2:
+ *           type: string
+ *         city:
+ *           type: string
+ *         state:
+ *           type: string
+ *         postalCode:
+ *           type: string
+ *         country:
+ *           type: string
+ *     "Craft Type":
+ *       type: object
+ *       required:
+ *         - name
+ *       properties:
+ *         id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *     ArtisanProfile:
+ *       type: object
+ *       required:
+ *         - name
+ *         - district
+ *         - city
+ *         - productType
+ *       properties:
+ *         name:
+ *           type: string
+ *         tagLine:
+ *           type: string
+ *         district:
+ *           type: string
+ *         city:
+ *           type: string
+ *         productType:
+ *           type: string
+ *         socialMedia:
+ *           type: string
+ *         about:
+ *           type: string
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
  *     Story:
  *       type: object
  *       properties:
@@ -67,6 +141,8 @@ const router = express.Router();
  *   post:
  *     summary: Create a new story for a user
  *     tags: [Story]
+ *     consumes:
+ *       - multipart/form-data
  *     parameters:
  *       - in: path
  *         name: id
@@ -77,9 +153,27 @@ const router = express.Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Story'
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Upload up to 3 images
  *     responses:
  *       201:
  *         description: The story was successfully created
@@ -89,25 +183,6 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Story'
  *       400:
  *         description: Bad request
- *   get:
- *     summary: Get all stories for a user
- *     tags: [Story]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The user id
- *     responses:
- *       200:
- *         description: List of all stories for the user
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Story'
  */
 
 /**
@@ -157,6 +232,8 @@ const router = express.Router();
  *   put:
  *     summary: Update a story by ID
  *     tags: [Story]
+ *     consumes:
+ *       - multipart/form-data
  *     parameters:
  *       - in: path
  *         name: id
@@ -167,9 +244,27 @@ const router = express.Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Story'
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Upload up to 3 images (replaces old images)
  *     responses:
  *       200:
  *         description: The updated story
@@ -201,7 +296,7 @@ const router = express.Router();
  *         description: Story not found
  */
 
-router.post("/", validateSchema(storySchema), createStory);
+router.post("/", validateSchema(storySchema), uploader.array("images", 3), createStory);
 router.get("/", getAllStories);
 router.get("/:id", getStoryById);
 router.put("/:id",  updateStory);
