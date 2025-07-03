@@ -95,8 +95,10 @@
  *                 type: string
  *               price:
  *                 type: number
+ *                 format: float
  *               category:
  *                 type: string
+ *                 enum: [pottery, textile, jewelry, woodwork, painting, other]
  *               stock:
  *                 type: integer
  *               images:
@@ -138,15 +140,85 @@
  *   get:
  *     summary: Get all products
  *     tags: [Product]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number (default 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Page size (default 10)
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter by category
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Filter by product name (partial match)
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: Filter by user ID
+ *       - in: query
+ *         name: artisanName
+ *         schema:
+ *           type: string
+ *         description: Filter by artisan name (partial match)
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         style: form
+ *         explode: false
+ *         description: Filter by tags (one or more)
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum price
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maximum price
  *     responses:
  *       200:
- *         description: List of all products
+ *         description: List of all products (with pagination and filters)
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Product'
+ *               type: object
+ *               properties:
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     prev:
+ *                       type: integer
+ *                       nullable: true
+ *                     next:
+ *                       type: integer
+ *                       nullable: true
  */
 
 /**
@@ -198,6 +270,7 @@
  *                 type: number
  *               category:
  *                 type: string
+ *                 enum: [pottery, textile, jewelry, woodwork, painting, other]
  *               stock:
  *                 type: integer
  *               images:
@@ -234,6 +307,23 @@
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Product not found
+ *   delete:
+ *     summary: Delete product by ID
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [Product]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The product id
+ *     responses:
+ *       204:
+ *         description: Product deleted successfully
  *       404:
  *         description: Product not found
  */

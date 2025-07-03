@@ -58,6 +58,7 @@
 - `GET /products` — getAllProducts
 - `GET /products/{id}` — getProductsById
 - `PUT /products/{id}` — updateProductsById
+- `DELETE /products/{id}` — deleteProductsById
 
 ## Reviews
 

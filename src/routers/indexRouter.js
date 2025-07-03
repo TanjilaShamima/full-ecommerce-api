@@ -1,10 +1,9 @@
-const router = require('express').Router();
-const authRouter = require('./authRouter');
-const userRouter = require('./userRouter');
-const adminRouter = require('./adminRouter');
-const craftTypeRouter = require('./craftTypeRouter');
-const productRouter = require('./productRouter');
-
+const router = require("express").Router();
+const authRouter = require("./authRouter");
+const userRouter = require("./userRouter");
+const adminRouter = require("./adminRouter");
+const craftTypeRouter = require("./craftTypeRouter");
+const productRouter = require("./productRouter");
 
 /**
  * @swagger
@@ -25,13 +24,18 @@ const productRouter = require('./productRouter');
  *     description: Story management and operations
  *   - name: Product
  *     description: Product management and operations
+ *   - name: Reviews
+ *     description: Reviews management and operations
+ *   - name: Cart
+ *     description: Cart management and operations
+ *   - name: Order
+ *     description: Order management and operations
  */
 
-
-router.use('/auth', authRouter);
-router.use('/users', userRouter);
-router.use('/admin', adminRouter);
-router.use('/craft-types', craftTypeRouter);
-router.use('/products', productRouter);
+router.use("/auth", authRouter);
+router.use("/users", userRouter);
+router.use("/admin", adminRouter);
+router.use("/craft-types", craftTypeRouter);
+router.use("/products", productRouter);
 
 module.exports = router;
