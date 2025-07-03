@@ -24,6 +24,7 @@ const { isLoggedIn } = require("../middlewares/auth");
 const { uploader } = require("../middlewares/upload");
 const artisanProfileSchema = require("../schemas/artisanProfileSchema");
 const storyRouter = require("./storyRouter");
+const { getAllUsers } = require("../controllers/adminController");
 
 /**
  * @swagger
@@ -31,6 +32,68 @@ const storyRouter = require("./storyRouter");
  *   name: User
  *   description: User APIs
  */
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users (paginated)
+ *     tags: [User]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number (default 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Page size (default 10)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by email, fullName, or username
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [super_admin, admin, customer, artisan, merchant]
+ *         description: Filter by user role
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, active, deactivate, baned, deleted]
+ *         description: Filter by user status
+ *     responses:
+ *       200:
+ *         description: Paginated list of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 users:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/src/schemas/User'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *       400:
+ *         description: Bad request
+ */
+router.get("/", getAllUsers);
 
 /**
  * @swagger
@@ -552,6 +615,6 @@ router.post("/update-password", updatePassword);
  *         country: "Bangladesh"
  */
 
-router.use("/:id/stories", isLoggedIn, storyRouter);
+// router.use("/:id/stories", isLoggedIn, storyRouter);
 
 module.exports = router;

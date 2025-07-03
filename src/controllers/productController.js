@@ -7,6 +7,10 @@ const User = require("../models/userModel");
 const ArtisanProfile = require("../models/artisanProfileModel");
 
 const addNewProduct = async (req, res) => {
+  const userId = req.user.userId || req.user.id;
+  if (!userId) {
+    throw createError(401, "Unauthorized: User ID not found");
+  }
   try {
     const {
       name,
@@ -39,11 +43,12 @@ const addNewProduct = async (req, res) => {
       category,
       stock,
       images: images.length > 0 ? images : null,
-      tags,
+      tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
       material,
       dimensions: dimensions ? JSON.parse(dimensions) : null,
       color,
       size,
+      userId, // Associate product with the user
     });
     successResponse(res, {
       statusCode: 201,

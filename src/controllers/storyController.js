@@ -5,11 +5,13 @@ const {
 const Story = require("../models/storyModel");
 const { successResponse } = require("../services/response");
 const createError = require("http-errors");
+const logger = require("../utils/logger");
+const User = require("../models/userModel");
 
 const createStory = async (req, res) => {
   try {
     const { title, content, tags } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     let images = [];
     if (req.files && req.files.length > 0) {
@@ -17,21 +19,24 @@ const createStory = async (req, res) => {
         throw createError(400, "You can upload between 1 and 5 images.");
       }
       for (const file of req.files) {
-        const imageUrl = await processUploadedImage(
+        const urls = await processUploadedImage(
           file.buffer,
           file.originalname
         );
-        images.push({ url: imageUrl });
+        images.push(urls);
       }
     }
-
-    const newStory = await Story.create({
+    const tempStory = {
       title,
       content,
       userId,
-      tags,
+      tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
       images: images.length > 0 ? images : null,
-    });
+    };
+
+    logger.info(tempStory);
+
+    const newStory = await Story.create(tempStory);
     successResponse(res, {
       statusCode: 201,
       message: "Story created successfully",
@@ -91,10 +96,14 @@ const updateStory = async (req, res) => {
   try {
     const storyId = req.params.id;
     const { title, content } = req.body;
+    const userId = req.user.userId || req.user.id;
 
     const story = await Story.findByPk(storyId);
     if (!story) {
       throw createError(404, "Story not found");
+    }
+    if (story.userId !== userId) {
+      throw createError(403, "Forbidden: Only the story owner can update this story");
     }
     if (req.files && req.files.length > 0) {
       // Remove old images from S3 if new images are uploaded
@@ -114,11 +123,9 @@ const updateStory = async (req, res) => {
       }
       story.images = newImages;
     }
-
     story.title = title;
     story.content = content;
     await story.save();
-
     successResponse(res, {
       statusCode: 200,
       message: "Story updated successfully",
@@ -135,19 +142,19 @@ const updateStory = async (req, res) => {
 const deleteStory = async (req, res) => {
   try {
     const storyId = req.params.id;
-
+    const userId = req.user.userId || req.user.id; 
     const story = await Story.findByPk(storyId);
     if (!story) {
       throw createError(404, "Story not found");
     }
-
+    if (story.userId !== userId) {
+      throw createError(403, "Forbidden: Only the story owner can delete this story");
+    }
     if (story.images && story.images.length > 0) {
-      // Assuming removeAllSizesImageFromS3 is a function that deletes images from S3
       for (const img of story.images) {
         removeAllSizesImage(img.url || img);
       }
     }
-
     await story.destroy();
     successResponse(res, {
       statusCode: 204,

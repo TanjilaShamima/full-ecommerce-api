@@ -16,9 +16,9 @@ const productSchema = Joi.object({
   tags: Joi.array().items(Joi.string()).optional(),
   material: Joi.string().min(3).max(50).optional(),
   dimensions: Joi.object({
-    length: Joi.number().positive().optional(),
-    width: Joi.number().positive().optional(),
-    height: Joi.number().positive().optional(),
+    length: Joi.string().optional(),
+    width: Joi.string().optional(),
+    height: Joi.string().optional(),
   }).optional(),
   color: Joi.string().min(3).max(30).optional(),
   size: Joi.string().min(1).max(20).optional(),

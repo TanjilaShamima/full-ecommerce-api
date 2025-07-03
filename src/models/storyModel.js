@@ -21,7 +21,7 @@ const Story = sequelize.define("Story", {
     allowNull: true,
   },
   images: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
+    type: DataTypes.JSONB, // Using JSONB to allow flexible structure for images
     allowNull: true,
   },
 });

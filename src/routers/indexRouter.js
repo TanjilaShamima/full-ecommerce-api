@@ -4,6 +4,7 @@ const userRouter = require("./userRouter");
 const adminRouter = require("./adminRouter");
 const craftTypeRouter = require("./craftTypeRouter");
 const productRouter = require("./productRouter");
+const storyRouter = require("./storyRouter");
 
 /**
  * @swagger
@@ -37,5 +38,6 @@ router.use("/users", userRouter);
 router.use("/admin", adminRouter);
 router.use("/craft-types", craftTypeRouter);
 router.use("/products", productRouter);
+router.use("/stories", storyRouter);
 
 module.exports = router;

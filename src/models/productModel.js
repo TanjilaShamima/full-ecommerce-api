@@ -28,11 +28,11 @@ const Product = sequelize.define("Product", {
     allowNull: false,
   },
   images: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
+    type: DataTypes.JSONB,
     allowNull: true,
   },
   tags: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
+    type: DataTypes.JSONB,
     allowNull: true,
   },
   material: {

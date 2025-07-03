@@ -124,21 +124,75 @@ const router = express.Router();
 
 /**
  * @swagger
- * /users/{id}/stories:
+ * /stories:
+ *   get:
+ *     summary: Get all stories
+ *     tags: [Story]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number (default 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of stories per page (default 10)
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: Filter by user ID
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         style: form
+ *         explode: false
+ *         description: Filter by tags (one or more)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by title or content
+ *     responses:
+ *       200:
+ *         description: List of stories (with pagination and filters)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 stories:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Story'
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ */
+
+/**
+ * @swagger
+ * /stories:
  *   post:
- *     summary: Create a new story for a user
+ *     summary: Create a new story
  *     security:
  *       - bearerAuth: []
  *     tags: [Story]
  *     consumes:
  *       - multipart/form-data
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: The user id
  *     requestBody:
  *       required: true
  *       content:
@@ -172,28 +226,8 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Story'
  *       400:
  *         description: Bad request
- */
-
-/**
- * @swagger
- * /users/{id}/stories:
- *   get:
- *     summary: Get all stories
- *     tags: [Story]
- *     responses:
- *       200:
- *         description: List of all stories
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Story'
- */
-
-/**
- * @swagger
- * /users/{id}/stories/{id}:
+ *
+ * /stories/{id}:
  *   get:
  *     summary: Get a story by ID
  *     tags: [Story]
@@ -213,13 +247,8 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Story'
  *       404:
  *         description: Story not found
- */
-
-/**
- * @swagger
- * /users/{id}/stories/{id}:
  *   put:
- *     summary: Update a story by ID
+ *     summary: Update a story by ID (only owner can update)
  *     security:
  *       - bearerAuth: []
  *     tags: [Story]
@@ -238,9 +267,6 @@ const router = express.Router();
  *         multipart/form-data:
  *           schema:
  *             type: object
- *             required:
- *               - title
- *               - content
  *             properties:
  *               title:
  *                 type: string
@@ -263,15 +289,12 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Story'
+ *       403:
+ *         description: Forbidden. Only the story owner can update.
  *       404:
  *         description: Story not found
- */
-
-/**
- * @swagger
- * /users/{id}/stories/{id}:
  *   delete:
- *     summary: Delete a story by ID
+ *     summary: Delete a story by ID (only owner can delete)
  *     security:
  *       - bearerAuth: []
  *     tags: [Story]
@@ -285,6 +308,8 @@ const router = express.Router();
  *     responses:
  *       204:
  *         description: Story deleted successfully
+ *       403:
+ *         description: Forbidden. Only the story owner can delete.
  *       404:
  *         description: Story not found
  */
@@ -298,7 +323,16 @@ router.post(
 );
 router.get("/", getAllStories);
 router.get("/:id", getStoryById);
-router.put("/:id", isLoggedIn, uploader.array("images", 3), updateStory);
-router.delete("/:id", isLoggedIn, deleteStory);
+router.put(
+  "/:id",
+  isLoggedIn,
+  uploader.array("images", 3),
+  updateStory // must check story.userId === req.user.id inside controller
+);
+router.delete(
+  "/:id",
+  isLoggedIn,
+  deleteStory // must check story.userId === req.user.id inside controller
+);
 
 module.exports = router;
