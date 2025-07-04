@@ -19,12 +19,11 @@ const {
   createArtisanProfile,
   getArtisanById,
   updateArtisanById,
+  getAllArtisans,
 } = require("../controllers/artisanProfileController");
 const { isLoggedIn } = require("../middlewares/auth");
 const { uploader } = require("../middlewares/upload");
 const artisanProfileSchema = require("../schemas/artisanProfileSchema");
-const storyRouter = require("./storyRouter");
-const { getAllUsers } = require("../controllers/adminController");
 
 /**
  * @swagger
@@ -35,10 +34,10 @@ const { getAllUsers } = require("../controllers/adminController");
 
 /**
  * @swagger
- * /users:
+ * /users/artisans:
  *   get:
- *     summary: Get all users (paginated)
- *     tags: [User]
+ *     summary: Get all artisans (paginated)
+ *     tags: [Artisan]
  *     parameters:
  *       - in: query
  *         name: page
@@ -56,12 +55,6 @@ const { getAllUsers } = require("../controllers/adminController");
  *           type: string
  *         description: Search by email, fullName, or username
  *       - in: query
- *         name: role
- *         schema:
- *           type: string
- *           enum: [super_admin, admin, customer, artisan, merchant]
- *         description: Filter by user role
- *       - in: query
  *         name: status
  *         schema:
  *           type: string
@@ -69,16 +62,16 @@ const { getAllUsers } = require("../controllers/adminController");
  *         description: Filter by user status
  *     responses:
  *       200:
- *         description: Paginated list of users
+ *         description: Paginated list of artisans
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 users:
+ *                 artisans:
  *                   type: array
  *                   items:
- *                     $ref: '#/src/schemas/User'
+ *                     $ref: '#/src/schemas/ArtisanProfile'
  *                 pagination:
  *                   type: object
  *                   properties:
@@ -93,7 +86,7 @@ const { getAllUsers } = require("../controllers/adminController");
  *       400:
  *         description: Bad request
  */
-router.get("/", getAllUsers);
+
 
 /**
  * @swagger
@@ -208,9 +201,6 @@ router.get("/me", isLoggedIn, getMyDetails);
  *       404:
  *         description: User not found
  */
-router.get("/:id", getUserById);
-router.put("/:id", isLoggedIn, uploader.single("image"), updateUserById);
-router.delete("/:id", deleteUserById);
 
 /**
  * @swagger
@@ -270,13 +260,8 @@ router.delete("/:id", deleteUserById);
  *       400:
  *         description: Bad request
  */
-router.get("/:id/addresses", isLoggedIn, getAllAddressesByUserId);
-router.post(
-  "/:id/addresses",
-  isLoggedIn,
-  validateSchema(addressSchema),
-  createAddressByUserId
-);
+
+
 /**
  * @swagger
  * /users/{id}/addresses/{addressId}:
@@ -343,13 +328,6 @@ router.post(
  *       404:
  *         description: Address not found
  */
-router.put(
-  "/:id/addresses/:addressId",
-  isLoggedIn,
-  validateSchema(addressSchema),
-  updateAddressByUserId
-);
-router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
 
 /**
  * @swagger
@@ -533,20 +511,6 @@ router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
  *       400:
  *         description: Bad request
  */
-router.get("/:id/artisan", getArtisanById);
-router.put(
-  "/:id/artisan",
-  isLoggedIn,
-  uploader.array("images", 3),
-  updateArtisanById
-);
-router.post(
-  "/:id/artisan",
-  isLoggedIn,
-  validateSchema(artisanProfileSchema),
-  uploader.array("images", 3),
-  createArtisanProfile
-);
 
 /**
  * @swagger
@@ -579,7 +543,6 @@ router.post(
  *       400:
  *         description: Invalid or expired token
  */
-router.post("/update-password", updatePassword);
 
 /**
  * @swagger
@@ -614,6 +577,40 @@ router.post("/update-password", updatePassword);
  *         postalCode: "1207"
  *         country: "Bangladesh"
  */
+
+router.get("/artisans", getAllArtisans);
+router.get("/:id", getUserById);
+router.put("/:id", isLoggedIn, uploader.single("image"), updateUserById);
+router.delete("/:id", deleteUserById);
+router.get("/:id/addresses", isLoggedIn, getAllAddressesByUserId);
+router.post(
+  "/:id/addresses",
+  isLoggedIn,
+  validateSchema(addressSchema),
+  createAddressByUserId
+);
+router.put(
+  "/:id/addresses/:addressId",
+  isLoggedIn,
+  validateSchema(addressSchema),
+  updateAddressByUserId
+);
+router.delete("/:id/addresses/:addressId", isLoggedIn, deleteAddressByUserId);
+router.get("/:id/artisan", getArtisanById);
+router.put(
+  "/:id/artisan",
+  isLoggedIn,
+  uploader.array("images", 3),
+  updateArtisanById
+);
+router.post(
+  "/:id/artisan",
+  isLoggedIn,
+  validateSchema(artisanProfileSchema),
+  uploader.array("images", 3),
+  createArtisanProfile
+);
+router.post("/update-password", updatePassword);
 
 // router.use("/:id/stories", isLoggedIn, storyRouter);
 

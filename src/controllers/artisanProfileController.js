@@ -4,6 +4,7 @@ const ArtisanProfile = require("../models/artisanProfileModel");
 const createError = require("http-errors");
 const { successResponse } = require("../services/response");
 const { processUploadedImagesToS3, removeAllSizesImageFromS3 } = require("../middlewares/upload");
+const User = require("../models/userModel");
 
 const getArtisanById = async (req, res) => {
   try {
@@ -95,8 +96,55 @@ const createArtisanProfile = async (req, res) => {
   }
 };
 
+const getAllArtisans = async (req, res) => {
+  try {
+    let { page = 1, limit = 10, search = "", status } = req.query;
+    page = parseInt(page);
+    limit = parseInt(limit);
+    const offset = (page - 1) * limit;
+    const where = {
+      ...(search
+        ? {
+            [Op.or]: [
+              { email: { [Op.iLike]: `%${search}%` } },
+              { fullName: { [Op.iLike]: `%${search}%` } },
+              { username: { [Op.iLike]: `%${search}%` } },
+            ],
+          }
+        : {}),
+      role: "artisan",
+      ...(status ? { status } : {}),
+    };
+    const { rows: users, count } = await User.findAndCountAll({
+      where,
+      offset,
+      limit,
+      order: [["createdAt", "DESC"]],
+      attributes: { exclude: ["password", "otp", "otpExpiresAt"] },
+    });
+    return successResponse(res, {
+      statusCode: 200,
+      message: "Users loaded successfully",
+      payload: {
+        users,
+      },
+      meta: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+        prev: page > 1 ? page - 1 : null,
+        next: count > offset + limit ? page + 1 : null,
+      },
+    });
+  } catch (error) {
+    throw createError(500, "Failed to retrieve users");
+  }
+};
+
 module.exports = {
   getArtisanById,
   updateArtisanById,
   createArtisanProfile,
+  getAllArtisans
 };

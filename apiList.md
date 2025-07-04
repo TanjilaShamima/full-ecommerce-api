@@ -74,7 +74,7 @@
 - `POST /cart/products/{productId}` — addProductInCart
 - `DELETE /cart/products/{productId}` — deleteProductFromCart
 - `PATCH /cart/products/{prodId}` — increment or decrement
-- `DELETE /cart/{id}` — deleteCartById
+- `DELETE /cart` — deleteCartById
 
 ## Order
 
