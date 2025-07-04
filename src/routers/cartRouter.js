@@ -57,32 +57,6 @@
  *               $ref: '#/components/schemas/Cart'
  *       404:
  *         description: Cart not found
- *   patch:
- *     summary: Update my cart (replace all products)
- *     security:
- *       - bearerAuth: []
- *     tags: [Cart]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               products:
- *                 type: array
- *                 items:
- *                   $ref: '#/components/schemas/CartProduct'
- *     responses:
- *       200:
- *         description: Cart updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Cart'
- *       404:
- *         description: Cart not found
- *
  * /carts/products/{productId}:
  *   post:
  *     summary: Add product to cart
@@ -105,8 +79,6 @@
  *             properties:
  *               quantity:
  *                 type: integer
- *               price:
- *                 type: number
  *     responses:
  *       200:
  *         description: Product added to cart successfully
@@ -173,7 +145,7 @@ const { isLoggedIn } = require("../middlewares/auth");
 const cartController = require("../controllers/cartController");
 
 router.get("/", isLoggedIn, cartController.getMyCartDetails);
-router.patch("/", isLoggedIn, cartController.updateMyCart);
+// router.patch("/", isLoggedIn, cartController.updateMyCart);
 router.delete("/", isLoggedIn, cartController.deleteMyCart);
 router.post("/products/:productId", isLoggedIn, cartController.addProductInCart);
 router.delete("/products/:productId", isLoggedIn, cartController.deleteProductFromCart);

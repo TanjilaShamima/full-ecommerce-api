@@ -2,6 +2,7 @@ const Cart = require("../models/cartModel");
 const { successResponse } = require("../services/response");
 const createError = require("http-errors");
 const logger = require("../utils/logger");
+const Product = require("../models/productModel");
 
 const getMyCartDetails = async (req, res) => {
   try {
@@ -86,7 +87,8 @@ const addProductInCart = async (req, res) => {
     if (existingProduct) {
       existingProduct.quantity += quantity;
     } else {
-      cart.products.push({ productId, quantity, price });
+      const product = await Product.findById(productId);
+      cart.products.push({ productId, quantity, price: product.price });
     }
 
     cart.totalPrice = cart.products.reduce((total, item) => total + item.price * item.quantity, 0);
