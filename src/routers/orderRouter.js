@@ -5,7 +5,7 @@
 
 const express = require("express");
 const {
-  createNewOrders,
+  createNewOrder,
   getAllOrders,
   getOrderById,
   updateOrderStatus
@@ -15,7 +15,7 @@ const permitRole = require("../middlewares/permitRole");
 
 const router = express.Router();
 
-router.post("/", isLoggedIn, createNewOrders);
+router.post("/", isLoggedIn, createNewOrder);
 router.get("/", isLoggedIn, getAllOrders);
 router.get("/:id", isLoggedIn, getOrderById);
 router.put("/:id/status", isLoggedIn, permitRole(["super_admin", "admin"]), updateOrderStatus);
@@ -38,6 +38,19 @@ module.exports = router;
  *           type: integer
  *         price:
  *           type: number
+ *     ShippingAddress:
+ *       type: object
+ *       properties:
+ *         street:
+ *           type: string
+ *         city:
+ *           type: string
+ *         state:
+ *           type: string
+ *         zip:
+ *           type: string
+ *         country:
+ *           type: string
  *     Order:
  *       type: object
  *       properties:
@@ -51,7 +64,13 @@ module.exports = router;
  *             $ref: '#/components/schemas/OrderProduct'
  *         totalPrice:
  *           type: number
+ *         shippingAddress:
+ *           $ref: '#/components/schemas/ShippingAddress'
  *         status:
+ *           type: string
+ *         paymentMethod:
+ *           type: string
+ *         paymentStatus:
  *           type: string
  *         createdAt:
  *           type: string
@@ -62,10 +81,11 @@ module.exports = router;
  *
  * /orders:
  *   post:
- *     summary: Create a new order
+ *     summary: Create a new order from cart
  *     security:
  *       - bearerAuth: []
  *     tags: [Order]
+ *     description: Creates a new order using the current user's cart products and total price. The cart is cleared after order creation.
  *     requestBody:
  *       required: true
  *       content:
@@ -73,12 +93,18 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               products:
- *                 type: array
- *                 items:
- *                   $ref: '#/components/schemas/OrderProduct'
+ *               shippingAddress:
+ *                 $ref: '#/components/schemas/ShippingAddress'
+ *               paymentMethod:
+ *                 type: string
+ *                 enum: [credit_card, online_banking, cash_on_delivery]
+ *               paymentStatus:
+ *                 type: string
+ *                 enum: [paid, unpaid]
  *             required:
- *               - products
+ *               - shippingAddress
+ *               - paymentMethod
+ *               - paymentStatus
  *     responses:
  *       201:
  *         description: Order created successfully
@@ -87,7 +113,8 @@ module.exports = router;
  *             schema:
  *               $ref: '#/components/schemas/Order'
  *       400:
- *         description: Bad request
+ *         description: Cart is empty or not found
+ *
  *   get:
  *     summary: Get all orders (for current user or admin)
  *     security:

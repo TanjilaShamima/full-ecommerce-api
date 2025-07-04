@@ -68,7 +68,7 @@
  *         name: productId
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Product ID to add
  *     requestBody:
  *       required: true
@@ -98,7 +98,7 @@
  *         name: productId
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Product ID to remove
  *     responses:
  *       200:
@@ -124,7 +124,7 @@
  *             type: object
  *             properties:
  *               prodId:
- *                 type: string
+ *                 type: integer
  *               action:
  *                 type: string
  *                 enum: [increment, decrement]

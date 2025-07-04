@@ -10,7 +10,7 @@ const orderSchema = Joi.object({
   products: Joi.array()
     .items(
       Joi.object({
-        productId: Joi.string().required(),
+        productId: Joi.integer().required(),
         quantity: Joi.number().integer().min(1).required(),
         price: Joi.number().precision(2).required(),
       })
@@ -29,7 +29,7 @@ const orderSchema = Joi.object({
     .default("pending"),
   paymentMethod: Joi.string()
     .valid("credit_card", "online_banking", "cash_on_delivery")
-    .required(),
+    .default("cash_on_delivery"),
   paymentStatus: Joi.string().valid("paid", "unpaid").default("unpaid"),
   createdAt: Joi.date().default(() => new Date(), "time of creation"),
   updatedAt: Joi.date().default(() => new Date(), "time of update"),

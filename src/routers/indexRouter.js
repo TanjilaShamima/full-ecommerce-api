@@ -6,6 +6,7 @@ const craftTypeRouter = require("./craftTypeRouter");
 const productRouter = require("./productRouter");
 const storyRouter = require("./storyRouter");
 const cartRouter = require("./cartRouter");
+const orderRouter = require("./orderRouter");
 
 /**
  * @swagger
@@ -41,5 +42,6 @@ router.use("/craft-types", craftTypeRouter);
 router.use("/products", productRouter);
 router.use("/stories", storyRouter);
 router.use("/carts", cartRouter);
+router.use("/orders", orderRouter);
 
 module.exports = router;

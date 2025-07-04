@@ -48,10 +48,10 @@ const { loginGoogle } = require("../controllers/authController");
  *               password:
  *                 type: string
  *             example:
- *               email: user@example.com
+ *               email: tanjila.cse.diu+100@gmail.com
  *               fullName: John Doe
  *               mobile: "01700000000"
- *               password: StrongPass123!
+ *               password: Test!123
  *               role: "artisan"
  *     responses:
  *       201:
@@ -78,10 +78,10 @@ router.post("/register", validateSchema(userSchema), registerUser);
  *             properties:
  *               email:
  *                 type: string
- *                 example: user@example.com
+ *                 example: tanjila.cse.diu+100@gmail.com
  *               password:
  *                 type: string
- *                 example: StrongPass123!
+ *                 example: Test!123
  *     responses:
  *       200:
  *         description: Login successful

@@ -1,33 +1,41 @@
+const Cart = require("../models/cartModel");
 const Orders = require("../models/orderModel");
 const createError = require("http-errors");
 const successResponse = require("../services/response").successResponse;
 
-const createNewOrders = async (req, res) => {
+const createNewOrder = async (req, res) => {
   try {
-    const { products, totalAmount } = req.body;
-    const userId = req.user.userId || req.user.id;
-
-    // Validate the request body
-    if (!products || !Array.isArray(products) || products.length === 0 || !totalAmount) {
-      return res.status(400).json({ message: "Invalid request data" });
+    const userId = req.user.userId;
+    const { shippingAddress, paymentMethod, paymentStatus } = req.body;
+    // Fetch the user's cart
+    const cart = await Cart.findOne({ where: { userId } });
+    if (!cart || !Array.isArray(cart.products) || cart.products.length === 0) {
+      throw createError(400, "Cart is empty or not found");
     }
-
-    // Create a new order
-    const newOrder = await Order.create({
+    if (!shippingAddress || !paymentMethod || !paymentStatus) {
+      throw createError(400, "shippingAddress, paymentMethod, and paymentStatus are required");
+    }
+    // Create the order using cart's products and totalPrice
+    const order = await Orders.create({
       userId,
-      products,
-      totalAmount,
-      status: "pending", // Default status
+      products: cart.products,
+      totalPrice: cart.totalPrice,
+      shippingAddress,
+      paymentMethod,
+      paymentStatus,
+      status: "pending", // or your default status
     });
-    
+
+    // Optionally, clear the cart after order creation
+    await cart.destroy();
+
     successResponse(res, {
       statusCode: 201,
       message: "Order created successfully",
-      payload: newOrder,
+      payload: order,
     });
   } catch (error) {
-    console.error("Error creating order:", error);
-    res.status(500).json({ message: "Internal server error" });
+    throw createError(error.status || 500, error.message || "Failed to create order");
   }
 };
 
@@ -75,7 +83,7 @@ const updateOrderStatus = async (req, res) => {
 };
 
 module.exports = {
-  createNewOrders,
+  createNewOrder,
   getAllOrders,
   getOrderById,
   updateOrderStatus,

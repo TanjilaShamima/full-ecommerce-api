@@ -16,6 +16,7 @@ const Cart = sequelize.define("Cart", {
   products: {
     type: DataTypes.JSONB, // Using JSONB to allow flexible structure for products
     allowNull: false,
+    defaultValue: [], // Default to an empty array if no products are added
   },
   totalPrice: {
     type: DataTypes.DECIMAL(10, 2),
