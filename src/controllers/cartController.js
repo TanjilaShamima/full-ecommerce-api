@@ -2,7 +2,7 @@ const Cart = require("../models/cartModel");
 const { successResponse } = require("../services/response");
 const createError = require("http-errors");
 const logger = require("../utils/logger");
-const Product = require("../models/productModel");
+const Products = require("../models/productModel");
 
 const getMyCartDetails = async (req, res) => {
   try {
@@ -13,8 +13,8 @@ const getMyCartDetails = async (req, res) => {
       throw createError(404, "Cart not found");
     }
 
-    res.status(200).json(cart);
     successResponse(res, {
+      statusCode: 200,
       message: "Cart details fetched successfully",
       payload: cart,
     });
@@ -41,6 +41,7 @@ const updateMyCart = async (req, res) => {
     }
 
     successResponse(res, {
+      statusCode: 200,
       message: "Cart updated successfully",
       payload: cart,
     });
@@ -62,6 +63,7 @@ const deleteMyCart = async (req, res) => {
     }
 
     successResponse(res, {
+      statusCode: 200,
       message: "Cart deleted successfully",
       payload: cart,
     });
@@ -87,7 +89,7 @@ const addProductInCart = async (req, res) => {
     if (existingProduct) {
       existingProduct.quantity += quantity;
     } else {
-      const product = await Product.findById(productId);
+      const product = await Products.findById(productId);
       cart.products.push({ productId, quantity, price: product.price });
     }
 
@@ -96,6 +98,7 @@ const addProductInCart = async (req, res) => {
     await cart.save();
 
     successResponse(res, {
+      statusCode: 201,
       message: "Product added to cart successfully",
       payload: cart,
     });
@@ -121,6 +124,7 @@ const deleteProductFromCart = async (req, res) => {
     }
 
     successResponse(res, {
+      statusCode: 200,
       message: "Product removed from cart successfully",
       payload: cart,
     });
@@ -167,6 +171,7 @@ const incrementOrDecrementProduct = async (req, res) => {
     await cart.save();
 
     successResponse(res, {
+      statusCode: 200,
       message: `Product quantity ${action}ed successfully`,
       payload: cart,
     });

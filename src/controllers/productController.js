@@ -1,4 +1,4 @@
-const Product = require("../models/productModel");
+const Products = require("../models/productModel");
 const { successResponse } = require("../services/response");
 const createError = require("http-errors");
 const { processUploadedImage } = require("../middlewares/upload");
@@ -36,7 +36,7 @@ const addNewProduct = async (req, res) => {
       }
     }
 
-    const newProduct = await Product.create({
+    const newProduct = await Products.create({
       name,
       description,
       price,
@@ -108,7 +108,7 @@ const getAllProducts = async (req, res) => {
     }
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
-    const { count, rows: products } = await Product.findAndCountAll({
+    const { count, rows: products } = await Products.findAndCountAll({
       where,
       include,
       offset,
@@ -142,7 +142,7 @@ const getAllProducts = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const productId = req.params.id;
-    const product = await Product.findByPk(productId);
+    const product = await Products.findByPk(productId);
     if (!product) {
       throw createError(404, "Product not found");
     }
@@ -174,7 +174,7 @@ const updateProductById = async (req, res) => {
       color,
       size,
     } = req.body;
-    const product = await Product.findByPk(productId);
+    const product = await Products.findByPk(productId);
     if (!product) {
       throw createError(404, "Product not found");
     }
@@ -216,7 +216,7 @@ const updateProductById = async (req, res) => {
 const deleteProductById = async (req, res) => {
   try {
     const productId = req.params.id;
-    const product = await Product.findByPk(productId);
+    const product = await Products.findByPk(productId);
     if (!product) {
       throw createError(404, "Product not found");
     }
