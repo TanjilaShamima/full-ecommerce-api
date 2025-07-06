@@ -8,7 +8,8 @@ const {
   createNewOrder,
   getAllOrders,
   getOrderById,
-  updateOrderStatus
+  updateOrderStatus,
+  cancelOrderById
 } = require("../controllers/orderController");
 const { isLoggedIn } = require("../middlewares/auth");
 const permitRole = require("../middlewares/permitRole");
@@ -19,6 +20,7 @@ router.post("/", isLoggedIn, createNewOrder);
 router.get("/", isLoggedIn, getAllOrders);
 router.get("/:id", isLoggedIn, getOrderById);
 router.put("/:id/status", isLoggedIn, permitRole(["super_admin", "admin"]), updateOrderStatus);
+router.put("/:id/cancel-order", isLoggedIn, cancelOrderById);
 
 module.exports = router;
 
@@ -156,6 +158,41 @@ module.exports = router;
  * /orders/{id}/status:
  *   put:
  *     summary: Update order status (admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [Order]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 description: New status for the order
+ *     responses:
+ *       200:
+ *         description: Order status updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Order not found
+ *
+ * /orders/{id}/cancel-order:
+ *   put:
+ *     summary: Cancel order status (user only)
  *     security:
  *       - bearerAuth: []
  *     tags: [Order]

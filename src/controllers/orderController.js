@@ -82,9 +82,33 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const cancelOrderById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const order = await Orders.findByPk(id);
+    if (!order) {
+        throw createError(404, "Order not found");
+    }
+
+    // Assuming 'cancelled' is a valid status in your application
+    order.status = "cancelled";
+    await order.save();
+
+    successResponse(res, {
+      statusCode: 200,
+      message: "Order cancelled successfully",
+    });
+  } catch (error) {
+    console.error("Error cancelling order:", error);
+    throw createError(error);
+  }
+};
+
 module.exports = {
   createNewOrder,
   getAllOrders,
   getOrderById,
   updateOrderStatus,
+  cancelOrderById
 };
